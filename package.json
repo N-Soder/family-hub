@@ -18,6 +18,7 @@
 		"db:migrate": "tsx scripts/migrate.ts",
 		"db:backup": "tsx scripts/backup.ts",
 		"seed": "tsx scripts/seed.ts",
+		"demo": "./scripts/demo.sh",
 		"test": "vitest run",
 		"test:e2e": "playwright test",
 		"tesserae:build-page": "tsx tesserae/scripts/build-page.ts"

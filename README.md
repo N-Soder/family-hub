@@ -44,7 +44,10 @@ welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Run it
 
-You need Docker (multi-arch images: arm64 and amd64). The E1003 is optional: the built-in
+**Just want a look?** `npm install && npm run demo` starts a made-up household with no Docker
+and no display; see [docs/getting-started.md](docs/getting-started.md).
+
+For the real thing you need Docker (multi-arch images: arm64 and amd64). The E1003 is optional: the built-in
 simulator shows exactly what Tesserae would send it.
 
 ```sh
@@ -106,11 +109,12 @@ docs/                       spec, architecture and decision records, roadmap, te
 
 | File | What it is |
 |---|---|
+| [docs/getting-started.md](docs/getting-started.md) | Demo, Docker setup, real display |
 | [docs/architecture.md](docs/architecture.md) | How it works, decision records (ADRs), spike results |
 | [docs/roadmap.md](docs/roadmap.md) | What is done and what is next |
 | [docs/testing.md](docs/testing.md) | Tests, simulator, measured latency, hardware checklist |
 | [docs/hardware-setup.md](docs/hardware-setup.md) | Flashing, pairing and wiring the E1003 |
-| [docs/SPEC.md](docs/SPEC.md) | The original spec |
+| [docs/SPEC.md](docs/SPEC.md) | The original spec (historical; ADRs win) |
 | [docs/skylight-parity.md](docs/skylight-parity.md) | Feature triage against a commercial family calendar |
 | [AGENTS.md](AGENTS.md) | Working agreement for contributors and coding agents |
 

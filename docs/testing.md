@@ -7,7 +7,7 @@ E1003 arrives and again after any Tesserae or firmware upgrade.
 
 ## 2. Automated (Stage 1) — built
 
-Run: `npm test` (Vitest, 229 tests, ~3 s), `npm run check` (svelte-check, strict TS),
+Run: `npm test` (Vitest, ~3 s), `npm run check` (svelte-check, strict TS),
 `npm run build && npm run test:e2e` (Playwright, production build, throwaway DB). Add
 `E2E_TESSERAE=1` to run the flow through a local Tesserae on :8765 (device `sim-e2e`), or
 `E2E_BASE_URL=http://localhost:3000 E2E_TESSERAE=1 E2E_PIN=<ADMIN_PIN>` against a running

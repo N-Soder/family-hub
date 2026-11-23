@@ -3,8 +3,9 @@ import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig(({ mode }) => {
-	// Dev: expose .env to server code (production gets real env vars from Compose).
-	if (mode === 'development') {
+	// Dev: expose .env to server code (production gets real env vars from Compose). The demo
+	// (scripts/demo.sh) skips it so it never picks up a real Tesserae or database.
+	if (mode === 'development' && !process.env.FAMILY_HUB_DEMO) {
 		for (const [k, v] of Object.entries(loadEnv(mode, process.cwd(), ''))) process.env[k] ??= v;
 	}
 	return {
