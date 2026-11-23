@@ -116,5 +116,7 @@ docs/                       spec, architecture and decision records, roadmap, te
 
 ## Licence
 
-Apache License 2.0, see [LICENSE](LICENSE). Tesserae is a separate project with its own
-licence and is pulled as a container image, not included here.
+GNU Affero General Public License v3.0 or later, see [LICENSE](LICENSE). You can use, change
+and self-host it freely; if you run a modified version that others use over a network, you must
+offer them its source. Tesserae is a separate project with its own licence and is pulled as a
+container image, not included here.

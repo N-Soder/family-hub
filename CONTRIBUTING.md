@@ -34,4 +34,4 @@ CI runs `check` and `test` on every pull request.
 Keep them focused, describe what you verified (and on what hardware, if any), and include a
 screenshot for UI changes. Use made-up names and data in tests, fixtures and screenshots.
 
-By contributing you agree your work is licensed under the [Apache License 2.0](LICENSE).
+By contributing you agree your work is licensed under the [GNU AGPL v3.0 or later](LICENSE).
