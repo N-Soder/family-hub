@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import Glyph from '$lib/components/Glyph.svelte';
-	import { cue, setSoundOn, soundOn, unlockAudio } from '$lib/kid-feedback';
+	import { cue, releaseAudio, setSoundOn, soundOn, unlockAudio } from '$lib/kid-feedback';
 	import { KIDS_KEY } from '$lib/prefs';
 	import type { PageProps } from './$types';
 	let { data }: PageProps = $props();
@@ -216,7 +216,8 @@
 
 		// Back from sleep: fetch today's state (the date may have rolled over).
 		const wake = () => {
-			if (document.visibilityState !== 'visible') return;
+			// Hidden: let the audio context go; iOS can leave it silent, and the next tap makes a new one.
+			if (document.visibilityState !== 'visible') return releaseAudio();
 			void invalidateAll();
 			void keepAwake();
 		};

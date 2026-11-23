@@ -17,10 +17,41 @@ function playbackSession() {
 	}
 }
 
+// After hours open, iPadOS can leave a context that says "running" but is silent (its clock has
+// stopped), or "interrupted" with a resume() that never settles. Reopening the app fixed it
+// because that makes a new context, so do the same: replace one that is stuck or long idle.
+const IDLE_MS = 5 * 60_000;
+let lastUse = 0; // performance.now() at the last audio() call
+let lastClock = 0; // ctx.currentTime at that call
+
+function stale(ac: AudioContext, now: number): boolean {
+	if (now - lastUse > IDLE_MS) return true;
+	if ((ac.state as string) === 'interrupted') return true;
+	// Running but the clock has not moved: a dead output. (Allow for timer jitter.)
+	const wall = (now - lastUse) / 1000;
+	return ac.state === 'running' && wall > 0.5 && ac.currentTime - lastClock < wall * 0.1;
+}
+
+function drop() {
+	const old = ctx;
+	ctx = null;
+	try {
+		void old?.close().catch(() => {});
+	} catch {
+		/* already gone */
+	}
+}
+
+/** Let the context go (the page is hidden); the next tap makes a fresh one. */
+export function releaseAudio() {
+	drop();
+}
+
 function audio(): AudioContext | null {
 	try {
 		playbackSession();
-		if (ctx?.state === 'closed') ctx = null;
+		const now = performance.now();
+		if (ctx && (ctx.state === 'closed' || stale(ctx, now))) drop();
 		if (!ctx) {
 			ctx = new AudioContext();
 			// A silent sample inside the first tap is what unlocks audio on iOS.
@@ -31,7 +62,9 @@ function audio(): AudioContext | null {
 		}
 		// iOS starts "suspended" and goes "interrupted" after the app is backgrounded or the
 		// screen sleeps; resuming inside a tap brings it back.
-		if (ctx.state !== 'running') void ctx.resume();
+		if (ctx.state !== 'running') void ctx.resume().catch(() => {});
+		lastUse = now;
+		lastClock = ctx.currentTime;
 		return ctx;
 	} catch {
 		return null;
@@ -90,8 +123,21 @@ export function cue(kind: Cue, sound = soundOn()) {
 	if (!sound) return;
 	const ac = audio();
 	if (!ac) return;
-	if (ac.state === 'running') play(ac, kind);
-	else ac.resume().then(() => play(ac, kind), () => {});
+	if (ac.state === 'running') return play(ac, kind);
+	// Not running yet (a fresh context waits for the tap to end). Play when it resumes, but not
+	// late: a resume that takes longer than this is dropped so the next tap starts clean.
+	let late = false;
+	const timer = setTimeout(() => {
+		late = true;
+		if (ctx === ac && ac.state !== 'running') drop();
+	}, 1500);
+	ac.resume().then(
+		() => {
+			clearTimeout(timer);
+			if (!late) play(ac, kind);
+		},
+		() => clearTimeout(timer)
+	);
 }
 
 function play(ac: AudioContext, kind: Cue) {
