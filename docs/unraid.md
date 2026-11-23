@@ -88,8 +88,9 @@ Claude can do them. Step 4 is a button in Unraid's web UI, so the owner presses 
 shell cannot reach LAN hosts, only the mounted share). Step 5 is checked in a browser and on
 the wall.
 
-1. **Commit.** `git archive` ships the commit, not the working tree, so uncommitted changes
-   are left out. Run `npm test` and `npm run check` first.
+1. **Merge, then pull.** `main` is protected (2026-11-23): changes land through a pull request
+   with CI green, then `git checkout main && git pull`. `git archive` ships the commit, not the
+   working tree, so uncommitted changes are left out.
 2. **Migrations back themselves up.** When the change adds a migration (`drizzle/`), the app
    copies the database to `data/family-hub/backups/family-hub-pre-NNNN-*.db` on start, before
    migrating (ADR-31). Rolling back past a migration needs that copy.
