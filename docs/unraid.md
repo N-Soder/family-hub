@@ -81,7 +81,8 @@ pairing because the IP and ports do not change.
 ## Update after a code change (the normal deploy)
 
 The source is copied from the Mac to the share, and Unraid builds and runs it. Nothing is
-pushed to a registry, and there is no CI. The repo has no git remote: commits live on the Mac only.
+pushed to a registry. Code reaches `main` through pull requests on GitHub (CI must pass);
+the deploy ships whatever local `main` holds after a pull.
 
 **Who does what.** Steps 1–3 run on the Mac, where the `projects` share is mounted and the stack folder is `/Volumes/projects/family-hub`.
 Claude can do them. Step 4 is a button in Unraid's web UI, so the owner presses it (Claude's
@@ -108,7 +109,7 @@ the wall.
    rsync -rlc --delete --inplace "$stage/" /Volumes/projects/family-hub/app/
    ```
    If the `is-ancestor` check prints nothing, stop: deploying would roll production back.
-   *Once only, after the 2026-11-23 history reset for GitHub:* `main` restarted from a single
+   *Done 2026-11-23 (first deploy from the new history, `da6a313`):* *Once only, after the 2026-11-23 history reset for GitHub:* `main` restarted from a single
    commit and the old history is the local-only branch `private-history`. While `DEPLOYED`
    still names an old commit, check `git merge-base --is-ancestor <DEPLOYED> private-history`
    instead, and that `git diff private-history main` shows only the publishing changes (names,
