@@ -1,5 +1,8 @@
 # Family Hub — Validated Spec (v1.0, 2026-10-24) — handed to implementation
 
+> **Historical.** This is the spec the project started from. Many decisions have since been
+> amended; where it and the ADRs in `docs/architecture.md` differ, the ADRs win.
+
 Status: **Stage 0 and Stage 1 built (2026-10-24)**; as-built decisions are ADR-9, ADR-13 to
 ADR-16 in `docs/architecture.md`. This document replaces the kickoff brief as the source of
 truth for Stage 0/1. Items marked **[Q]** are open questions for the owner; each has a

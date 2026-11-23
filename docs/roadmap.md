@@ -56,6 +56,14 @@ Today split into Calendar and Routines tabs (ADR-20, `docs/design.md`).
 
 **2026-10-31 — Planner day-type UI tidy.** "Day types" became **Schedule** (`/planner/schedule`): each child's week as one-tap chips (also on the member page), the day types with their tagged-step counts, and a "What changes by day" summary per routine. Routine editor: day tags on every step, a "Shows on" chip control (Every day / types), and a "Preview a day" switcher. Routines tab (desktop): "Today is" chips with the usual type marked; a pick applies at once (ADR-21), so the "Regenerate today" button is gone (step edits already sync today). Day types take the theme tones in order (teal, marigold, plum, …). No schema change.
 
+## Open source (2026-11-23)
+Published at github.com/N-Soder/family-hub under AGPL-3.0-or-later, with real names and
+addresses replaced and a fresh history (the old one is a local-only branch; `docs/unraid.md`).
+CI runs `check`, `test` and `npm audit --omit=dev` on every push and PR (closes M2);
+Dependabot groups minor/patch updates. `npm run demo` starts a made-up household without
+Tesserae (`src/lib/server/demo.ts`; `docs/getting-started.md`); the README screenshots use it.
+Making it fit other households is tracked as GitHub issues.
+
 ## Hardening (audit 2026-11-05)
 Built 2026-11-06: daily and pre-migration backups with a restore test (H1, ADR-31); docs
 corrected (H3); PIN change needs the current PIN and signs out other phones, "Sign out all
@@ -65,7 +73,6 @@ bad JSON and unknown steps (L4, L5); security headers (L6); device removal (L10)
 escaping test; Kit `csrf.trustedOrigins`; `npm run tesserae:build-page`.
 
 Waiting on the owner:
-- A private git remote (M2), then a CI job: `npm ci && npm run check && npm test && npm audit --omit=dev`.
 - Confirm Unraid's appdata backup covers `data/family-hub/` (U1), and drill a restore once.
 - Undo or soft delete for list items (M3).
 - A kid-only session scope for the kid tablet (M1, an ADR-27 amendment).

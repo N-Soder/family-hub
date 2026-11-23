@@ -1,5 +1,8 @@
 # Handoff — Family Hub kickoff (2026-10-24)
 
+> **Historical:** the brief that started the project, kept for context. For current state see
+> `README.md`, `docs/architecture.md` and `docs/roadmap.md`.
+
 > **Done 2026-10-24:** Stage 0 (S0–S6) and Stage 1 are built and verified; see
 > `docs/roadmap.md` for status and next tasks. The brief below is kept as written.
 

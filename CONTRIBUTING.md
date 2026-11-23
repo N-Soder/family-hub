@@ -9,12 +9,13 @@ Node 22 and Docker. See [README.md](README.md) for running the stack and the dev
 
 ```sh
 npm ci
+npm run demo             # made-up household on :5173, no Docker needed
 npm run check            # svelte-check, strict TypeScript
 npm test                 # Vitest, unit + integration
 npm run build && npm run test:e2e   # Playwright against a throwaway database
 ```
 
-CI runs `check` and `test` on every pull request.
+CI runs `check`, `test` and `npm audit --omit=dev` on every pull request.
 
 ## Conventions
 
