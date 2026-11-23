@@ -55,9 +55,10 @@ Planner away from home.
 
 ## Where things are assumed
 
-Family Hub grew up in one household in Western Australia. Known assumptions that may not fit
-yours (each has a GitHub issue):
+Family Hub grew up in one household in Western Australia, and some of its assumptions may not
+fit yours. Each has a GitHub issue, and help is welcome:
 
-- Dates are formatted for Australia, temperatures are °C, and the afternoon is the "Arvo".
-- One shared Planner PIN; there are no per-adult accounts yet.
-- The wall layout is drawn for the E1003's size.
+- Some code still falls back to Perth time instead of `TZ_HOUSEHOLD` ([#11](https://github.com/N-Soder/family-hub/issues/11)).
+- Dates are formatted for Australia and the afternoon is the "Arvo" ([#12](https://github.com/N-Soder/family-hub/issues/12)); temperatures are °C ([#13](https://github.com/N-Soder/family-hub/issues/13)).
+- One shared Planner PIN; there are no per-adult accounts yet ([#14](https://github.com/N-Soder/family-hub/issues/14)).
+- The wall layout is drawn for the E1003's size ([#16](https://github.com/N-Soder/family-hub/issues/16)).
