@@ -32,6 +32,10 @@ CI runs `check`, `test` and `npm audit --omit=dev` on every pull request.
 
 ## Pull requests
 
+`main` is protected: every change, the maintainer's included, goes through a pull request,
+and CI must pass before it merges (no approval is required; turn on auto-merge to have it
+merge when CI passes). Branch from `main`, and keep branches short-lived.
+
 Keep them focused, describe what you verified (and on what hardware, if any), and include a
 screenshot for UI changes. Use made-up names and data in tests, fixtures and screenshots.
 
