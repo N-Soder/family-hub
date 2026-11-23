@@ -1,0 +1,14 @@
+/* The wall's font names (cached in Tesserae as "FH Fraunces" / "FH Outfit", docs/design.md), so the
+   /sim direct view paints with the same faces as the wall. Same files as the Planner. */
+@font-face {
+	font-family: 'FH Fraunces';
+	src: url('./fonts/fraunces.woff2') format('woff2');
+	font-weight: 100 900;
+	font-display: block;
+}
+@font-face {
+	font-family: 'FH Outfit';
+	src: url('./fonts/outfit.woff2') format('woff2');
+	font-weight: 100 900;
+	font-display: block;
+}

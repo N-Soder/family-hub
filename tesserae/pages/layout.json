@@ -1,0 +1,55 @@
+{
+  "$comment": "Wall geometry (portrait 1404x1872), read by tesserae/paint/routine.js (Tesserae code element and /sim). Home flows top to bottom inside `pad`: the top part holds the date and buttons, the weather band, then TODAY beside TO DO (up to `todoSlots` rows of urgent list items); it is as tall as it needs, at most `home.topH`, with TODAY / TO DO growing up to x1.3 to fill it; the AGENDA takes the rest (whole days only); a quiet footer sits in the bottom padding. The routines screen (`routinesSlot` opens it; `memberSlots` are its child tabs) shows one child's checklist: variants size its rows (rows shrink evenly to fit); the whole row is a step's tap target. `lists` sizes the lists screen (up to `slots` rows shared between the first two lists); `navSlot` is the Lists/Back button's tap slot; `planSlot` is the old baby plan button (older frames only). `plan` sizes the baby's plan screen (read only; rows shrink to fit).",
+  "canvas": {
+    "w": 1404,
+    "h": 1872
+  },
+  "pad": {
+    "top": 36,
+    "x": 48,
+    "bottom": 90
+  },
+  "gap": 40,
+  "variants": {
+    "reader": {
+      "slots": 8,
+      "rowH": 150,
+      "gap": 12,
+      "glyph": 92,
+      "title": 60
+    },
+    "picture": {
+      "slots": 6,
+      "rowH": 190,
+      "gap": 16,
+      "glyph": 160,
+      "title": 56
+    }
+  },
+  "navSlot": 20,
+  "planSlot": 21,
+  "routinesSlot": 22,
+  "memberSlots": [23, 24, 25, 26],
+  "home": {
+    "topH": 1120,
+    "todoSlots": 5,
+    "rowH": 80,
+    "gap": 8,
+    "box": 60,
+    "title": 40,
+    "colGap": 40
+  },
+  "plan": {
+    "rowH": 124,
+    "time": 58,
+    "title": 50,
+    "glyph": 64
+  },
+  "lists": {
+    "slots": 12,
+    "rowH": 100,
+    "gap": 10,
+    "box": 84,
+    "title": 52
+  }
+}

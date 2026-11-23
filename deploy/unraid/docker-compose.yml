@@ -1,0 +1,60 @@
+# Family Hub on Unraid (docs/unraid.md). Compose Manager stack whose directory is
+# /mnt/user/projects/family-hub (folder in the `projects` share), laid out as:
+#   /mnt/user/projects/family-hub/docker-compose.yml   this file
+#   /mnt/user/projects/family-hub/.env                 secrets (from .env.example; HOST_LAN_IP = Unraid's IP)
+#   /mnt/user/projects/family-hub/app/                 source (git archive of this repo); built here, amd64
+#   /mnt/user/projects/family-hub/data/family-hub/     SQLite database
+#   /mnt/user/projects/family-hub/data/tesserae/       Tesserae data (devices, pages, plugins)
+# Keep the `projects` share on a cache pool only (no array/mover): SQLite should not sit behind FUSE moves.
+services:
+  family-hub:
+    build: ./app
+    image: family-hub:local
+    # Rebuild from ./app on every Compose Up (unchanged layers come from cache). Without this,
+    # Compose reuses the first image and code updates copied to app/ never go live.
+    pull_policy: build
+    restart: unless-stopped
+    # Unraid's nobody:users, so files on the share stay editable over SMB.
+    user: "99:100"
+    depends_on: [tesserae]
+    ports: ["${APP_PORT:-3000}:3000"]
+    volumes:
+      - ./data/family-hub:/data
+      # Tesserae's downloaded calendar feeds, read-only, for the Planner's Today tab (ADR-19).
+      - ./data/tesserae/plugins/calendar_core:/calendar:ro
+    environment:
+      DATABASE_PATH: /data/family-hub.db
+      CALENDAR_DIR: /calendar
+      ADMIN_PIN: ${ADMIN_PIN}
+      TZ_HOUSEHOLD: ${TZ_HOUSEHOLD:-Australia/Perth}
+      DAY_ROLLOVER: ${DAY_ROLLOVER:-03:00}
+      SEED_ON_EMPTY: "true"
+      TESSERAE_URL: http://tesserae:8765
+      TESSERAE_ADMIN_PASSWORD: ${TESSERAE_ADMIN_PASSWORD}
+      TESSERAE_PUSH_TOKEN: ${TESSERAE_PUSH_TOKEN}
+      APP_BASE_URL_FOR_TESSERAE: http://family-hub:3000
+      TESSERAE_AUTO_BOOTSTRAP: "true"
+      SIM_DEVICE_ID: ${SIM_DEVICE_ID:-sim-wall}
+      # Cloudflare Access login replaces the PIN on the public hostname (ADR-18); blank = off.
+      CF_ACCESS_TEAM_DOMAIN: ${CF_ACCESS_TEAM_DOMAIN:-}
+      CF_ACCESS_AUD: ${CF_ACCESS_AUD:-}
+
+  tesserae:
+    image: ghcr.io/dmellok/tesserae:0.475.0 # pinned; upgrade deliberately (docs/roadmap.md)
+    restart: unless-stopped
+    ports: ["${TESSERAE_PORT:-8765}:8765"]
+    volumes: ["./data/tesserae:/app/data"]
+    environment:
+      TESSERAE_SECRET_KEY: ${TESSERAE_SECRET_KEY}
+      TESSERAE_HOST_IP: ${HOST_LAN_IP}
+      TZ: ${TZ_HOUSEHOLD:-Australia/Perth}
+
+  # Remote access (ADR-17, docs/remote-access.md). Compose Manager starts every service, so this
+  # one is commented out until CLOUDFLARE_TUNNEL_TOKEN is in .env; then uncomment and Compose Up.
+  # cloudflared:
+  #   image: cloudflare/cloudflared:2026.10.0
+  #   restart: unless-stopped
+  #   depends_on: [family-hub]
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}

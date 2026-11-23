@@ -1,0 +1,17 @@
+{
+  "tesserae_compat": "1.x",
+  "name": "Family Hub",
+  "version": "1.0.0",
+  "kind": "widget",
+  "description": "Data source for the Family Hub wall page: GETs /api/render/{device}/{page}.json from the Family Hub app. The page's code element paints it.",
+  "icon": "ph-list-checks",
+  "supports": { "sizes": ["sm", "md", "lg"] },
+  "requires": ["network:family-hub", "network:host.docker.internal"],
+  "cell_options": [
+    { "name": "base_url", "type": "string", "label": "Family Hub URL", "default": "http://family-hub:3000" },
+    { "name": "device", "type": "string", "label": "Device id", "default": "" },
+    { "name": "page", "type": "string", "label": "Page", "default": "home" },
+    { "name": "token", "type": "string", "label": "Device token", "secret": true, "mask": true, "default": "" }
+  ],
+  "render": { "dither": "none", "needs_network": false }
+}

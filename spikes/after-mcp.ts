@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import { TesseraeAdmin, FakeDevice } from '../src/lib/server/tesserae/client';
+const env = Object.fromEntries(fs.readFileSync('.env','utf8').split('\n').filter(Boolean).map(l=>l.split(/=(.*)/s).slice(0,2)));
+const base='http://localhost:8765';
+const admin = new TesseraeAdmin({baseUrl:base, mcpToken: env.TESSERAE_MCP_TOKEN});
+const dev = new FakeDevice(base,'sim-e1003','aa:bb:cc:dd:ee:01'); dev.token=fs.readFileSync('spikes/.tok-sim-e1003','utf8');
+const page=process.argv[2];
+const t0=Date.now(); console.log(JSON.stringify(await admin.mcp('POST',`/pages/${page}/push`,{device_ids:[dev.id]})), Date.now()-t0,'ms');
+await dev.frame(); const regs=await dev.manifest(); console.log('regions', regs.map(r=>r.id).join(','));
+console.log('tap', await dev.tap(regs[1].id));

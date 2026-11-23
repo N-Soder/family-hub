@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="text-scale" content="scale" />
+		<!-- use-credentials: behind Cloudflare Access the manifest fetch needs the Access cookie -->
+		<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
+		<link rel="icon" href="/icons/storybook.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/icons/storybook-180.png" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="Family Hub" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="theme-color" content="#fff8ee" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#18161d" media="(prefers-color-scheme: dark)" />
+		<!-- Planner per-phone choices from Settings (src/lib/prefs.ts), applied before first paint:
+		     light/dark pinned, "show setup tools on this phone", and kid view (a tablet left in it reopens there). -->
+		<script>try{var r=document.documentElement,t=localStorage.getItem('fh-theme');if(t==='light'||t==='dark')r.dataset.theme=t;if(localStorage.getItem('fh-setup')==='on')r.dataset.setup='on';var p=location.pathname;if(localStorage.getItem('fh-kids')==='on'&&/^\/planner(\/|$)/.test(p)&&!/^\/planner\/(kids|login)/.test(p))location.replace('/planner/kids')}catch(e){}</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

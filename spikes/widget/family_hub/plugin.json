@@ -1,0 +1,19 @@
+{
+  "tesserae_compat": "1.x",
+  "name": "Family Hub",
+  "version": "0.0.1",
+  "kind": "widget",
+  "description": "spike",
+  "icon": "ph-list-checks",
+  "supports": { "sizes": ["sm", "md", "lg"] },
+  "requires": ["network:family-hub", "network:host.docker.internal", "settings:plugin"],
+  "settings": [
+    { "name": "base_url", "type": "string", "label": "Base URL", "default": "http://host.docker.internal:9999" },
+    { "name": "token", "type": "string", "label": "Bearer token", "secret": true, "default": "" }
+  ],
+  "cell_options": [
+    { "name": "device", "type": "string", "label": "Device id", "default": "" },
+    { "name": "page", "type": "string", "label": "Page", "default": "home" }
+  ],
+  "render": { "dither": "none", "needs_network": false }
+}

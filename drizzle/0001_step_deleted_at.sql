@@ -1,0 +1,1 @@
+ALTER TABLE `routine_step` ADD `deleted_at` text;

@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+const base = 'http://localhost:8765'; const id = 'sim-e1003';
+const token = fs.readFileSync(`spikes/.tok-${id}`, 'utf8');
+const H = { authorization: `Bearer ${token}`, 'content-type': 'application/json' };
+const frame = async () => (await (await fetch(`${base}/api/v1/device/${id}/frame`, { headers: H })).json()).render_id as string;
+const tap = async (digest: string, event_id: number) => (await (await fetch(`${base}/api/v1/device/${id}/tap`, { method: 'POST', headers: H, body: JSON.stringify({ digest, region_id: 'el:slot2:tap', gesture: 'tap', event_id }) })).json()).outcome;
+const d0 = await frame();
+const ev = Math.floor(Date.now() / 1000) + 1000;
+console.log('first', await tap(d0, ev));
+console.log('same event id again', await tap(d0, ev));
+await new Promise((r) => setTimeout(r, 2500));
+console.log('bogus digest', await tap('deadbeefdeadbeef', ev + 1));
+const d1 = await frame();
+console.log('digest changed after push?', d0 !== d1, d0, d1);
+console.log('old digest after change', await tap(d0, ev + 2));

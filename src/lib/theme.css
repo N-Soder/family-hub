@@ -1,0 +1,320 @@
+/* Planner theme: "Storybook". Warm paper, a soft serif for headings (Fraunces), a round sans
+   for everything else (Outfit), and clear colour (tomato, marigold, teal, plum, sky).
+   Light by default on a light phone, dark on a dark one; the header button pins either
+   (stored per phone, applied by the inline script in app.html before first paint). */
+
+@font-face {
+	font-family: 'Fraunces';
+	src: url('./fonts/fraunces.woff2') format('woff2');
+	font-weight: 100 900;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Outfit';
+	src: url('./fonts/outfit.woff2') format('woff2');
+	font-weight: 100 900;
+	font-display: swap;
+}
+
+:root {
+	--bg: #fff8ee;
+	--card: #ffffff;
+	--ink: #23253a;
+	--muted: #6a6458;
+	--line: #efe4d2;
+	--line-strong: #e2d5bf;
+	--shadow: 0 1px 0 #efe4d2, 0 10px 24px -16px rgba(120, 80, 30, 0.4);
+	--accent: #e2553e;
+	--accent-ink: #c2412b;
+	--on-accent: #ffffff;
+	--warn: #b3361f;
+	/* Tones: a strong colour, a soft fill behind it, and a readable text shade. */
+	--tomato: #e2553e;
+	--tomato-soft: #fde6e0;
+	--tomato-ink: #b23a24;
+	--sun: #f4a72c;
+	--sun-soft: #fff1da;
+	--sun-ink: #8a5300;
+	--teal: #138a7e;
+	--teal-soft: #ddf2ee;
+	--teal-ink: #0d6b61;
+	--plum: #7a4fa0;
+	--plum-soft: #ece4f6;
+	--plum-ink: #5b3a85;
+	--sky: #2f6fbf;
+	--sky-soft: #e3eefb;
+	--sky-ink: #2b5a96;
+	--serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+	--sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--bg: #18161d;
+		--card: #232029;
+		--ink: #f6efe4;
+		--muted: #b3aa9c;
+		--line: #332f3a;
+		--line-strong: #423d4a;
+		--shadow: 0 1px 0 #2c2833;
+		--accent: #f07a61;
+		--accent-ink: #ff9a84;
+		--on-accent: #1c1418;
+		--warn: #ff9a84;
+		--tomato: #f07a61;
+		--tomato-soft: #45261f;
+		--tomato-ink: #ffab98;
+		--sun: #f6b955;
+		--sun-soft: #43331b;
+		--sun-ink: #ffd38a;
+		--teal: #3fc1b1;
+		--teal-soft: #163c38;
+		--teal-ink: #84e2d6;
+		--plum: #b48ae0;
+		--plum-soft: #352a47;
+		--plum-ink: #d6bff2;
+		--sky: #6ea6ea;
+		--sky-soft: #1f3049;
+		--sky-ink: #a9cbf5;
+		color-scheme: dark;
+	}
+}
+:root[data-theme='dark'] {
+	--bg: #18161d;
+	--card: #232029;
+	--ink: #f6efe4;
+	--muted: #b3aa9c;
+	--line: #332f3a;
+	--line-strong: #423d4a;
+	--shadow: 0 1px 0 #2c2833;
+	--accent: #f07a61;
+	--accent-ink: #ff9a84;
+	--on-accent: #1c1418;
+	--warn: #ff9a84;
+	--tomato: #f07a61;
+	--tomato-soft: #45261f;
+	--tomato-ink: #ffab98;
+	--sun: #f6b955;
+	--sun-soft: #43331b;
+	--sun-ink: #ffd38a;
+	--teal: #3fc1b1;
+	--teal-soft: #163c38;
+	--teal-ink: #84e2d6;
+	--plum: #b48ae0;
+	--plum-soft: #352a47;
+	--plum-ink: #d6bff2;
+	--sky: #6ea6ea;
+	--sky-soft: #1f3049;
+	--sky-ink: #a9cbf5;
+	color-scheme: dark;
+}
+
+/* .tone-N picks one colour family; children use --tone, --tone-soft, --tone-ink. */
+.tone-0 { --tone: var(--tomato); --tone-soft: var(--tomato-soft); --tone-ink: var(--tomato-ink); }
+.tone-1 { --tone: var(--teal); --tone-soft: var(--teal-soft); --tone-ink: var(--teal-ink); }
+.tone-2 { --tone: var(--sun); --tone-soft: var(--sun-soft); --tone-ink: var(--sun-ink); }
+.tone-3 { --tone: var(--plum); --tone-soft: var(--plum-soft); --tone-ink: var(--plum-ink); }
+.tone-4 { --tone: var(--sky); --tone-soft: var(--sky-soft); --tone-ink: var(--sky-ink); }
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font: 16px/1.45 var(--sans);
+	-webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+.serif {
+	font-family: var(--serif);
+	font-variation-settings: 'SOFT' 100, 'WONK' 1;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+}
+h1 {
+	font-size: 2.1rem;
+	line-height: 1.05;
+	margin: 0.2rem 0 1rem;
+	letter-spacing: -0.02em;
+}
+h2 {
+	font-size: 1.4rem;
+	margin: 1.4rem 0 0.6rem;
+}
+h3 {
+	font-weight: 600;
+}
+a {
+	color: var(--accent-ink);
+}
+.card {
+	background: var(--card);
+	border-radius: 22px;
+	padding: 16px;
+	margin-bottom: 14px;
+	box-shadow: var(--shadow);
+}
+details.card > summary {
+	cursor: pointer;
+}
+label.field,
+div.field {
+	display: block;
+	margin: 0 0 14px;
+	font-weight: 600;
+}
+label.field > input:not([type='checkbox']),
+label.field > select,
+label.field > textarea {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 6px;
+	font: inherit;
+	font-weight: 400;
+	font-size: 17px;
+	padding: 11px 14px;
+	border-radius: 14px;
+	border: 1.5px solid var(--line-strong);
+	background: var(--card);
+	color: var(--ink);
+}
+select {
+	font: inherit;
+	color: var(--ink);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+	outline: 3px solid var(--sun);
+	outline-offset: 2px;
+}
+button,
+.button {
+	font: inherit;
+	font-weight: 600;
+	padding: 10px 18px;
+	border-radius: 999px;
+	border: 1.5px solid var(--accent);
+	background: var(--accent);
+	color: var(--on-accent);
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+}
+button.ghost {
+	background: var(--card);
+	color: var(--ink);
+	border-color: var(--line-strong);
+}
+button.link {
+	background: none;
+	border: none;
+	color: var(--muted);
+	padding: 0;
+	font-weight: 500;
+}
+.error {
+	color: var(--warn);
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+.muted {
+	color: var(--muted);
+}
+.row {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+.spread {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+}
+/* Small all-caps label above a page title. */
+.eyebrow {
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+/* Rounded pill label, coloured by its tone. */
+.pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	border-radius: 999px;
+	padding: 3px 10px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	background: var(--tone-soft, var(--line));
+	color: var(--tone-ink, var(--ink));
+	white-space: nowrap;
+}
+/* Icon on a soft rounded square, as in step rows. */
+.chip {
+	flex: none;
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	border-radius: 14px;
+	background: var(--tone-soft);
+	color: var(--tone-ink);
+	--glyph-bg: var(--tone);
+}
+/* One-tap choice (day types, filters): a button, or a label around a hidden checkbox.
+   Chosen = the tone's soft fill and ink, so each day type keeps its colour. */
+.choices {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.choice {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 40px;
+	box-sizing: border-box;
+	padding: 6px 14px;
+	border-radius: 999px;
+	border: 1.5px solid var(--line-strong);
+	background: var(--card);
+	color: var(--ink);
+	font: inherit;
+	font-weight: 600;
+	font-size: 0.92rem;
+	cursor: pointer;
+	position: relative;
+	--glyph-bg: var(--tone, var(--ink));
+}
+.choice:hover {
+	border-color: var(--muted);
+}
+.choice[aria-pressed='true'],
+.choice:has(input:checked) {
+	background: var(--tone-soft, var(--ink));
+	border-color: var(--tone, var(--ink));
+	color: var(--tone-ink, var(--bg));
+}
+.choice:has(input:focus-visible) {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+.choice > input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+.choice .note {
+	font-weight: 500;
+	font-size: 0.75rem;
+	opacity: 0.8;
+}

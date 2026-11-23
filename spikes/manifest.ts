@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import { TesseraeAdmin } from '../src/lib/server/tesserae/client';
+const env = Object.fromEntries(fs.readFileSync('.env','utf8').split('\n').filter(Boolean).map(l=>l.split(/=(.*)/s).slice(0,2)));
+const t = new TesseraeAdmin({ baseUrl: 'http://localhost:8765', mcpToken: env.TESSERAE_MCP_TOKEN, pushToken: env.TESSERAE_PUSH_TOKEN });
+const TOK = fs.readFileSync('spikes/.tok-sim-e1003','utf8'); const H = { authorization: `Bearer ${TOK}` };
+const page = process.argv[2];
+const man = async () => { const f = await (await fetch('http://localhost:8765/api/v1/device/sim-e1003/frame',{headers:H})).json(); const m = await (await fetch(`http://localhost:8765/api/v1/device/sim-e1003/frame/manifest?digest=${f.render_id}`,{headers:H})).json(); return `${f.render_id} regions=${m.regions.length}`; };
+console.log('mcp push', JSON.stringify(await t.mcp('POST', `/pages/${page}/push`, { device_ids: ['sim-e1003'] })), await man());
+await new Promise(r=>setTimeout(r,3000)); console.log('3s later', await man());
+console.log('send/page'); await (new TesseraeAdmin({ baseUrl: 'http://localhost:8765', adminPassword: env.TESSERAE_ADMIN_PASSWORD })).form('/send/page', { page_id: page }); await new Promise(r=>setTimeout(r,2500)); console.log('after send/page', await man());
+console.log('mcp push again'); await t.mcp('POST', `/pages/${page}/push`, { device_ids: ['sim-e1003'] }); console.log(await man());

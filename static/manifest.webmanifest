@@ -1,0 +1,23 @@
+{
+	"id": "/planner",
+	"name": "Family Hub",
+	"short_name": "Family Hub",
+	"description": "The family's day: routines, calendar, lists and notes.",
+	"start_url": "/planner",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "portrait",
+	"background_color": "#fff8ee",
+	"theme_color": "#fff8ee",
+	"icons": [
+		{ "src": "/icons/storybook-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+		{ "src": "/icons/storybook-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+		{ "src": "/icons/storybook-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+		{ "src": "/icons/storybook.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+	],
+	"shortcuts": [
+		{ "name": "Lists", "url": "/planner/lists", "icons": [{ "src": "/icons/storybook-192.png", "sizes": "192x192" }] },
+		{ "name": "Notes", "url": "/planner/notes", "icons": [{ "src": "/icons/storybook-192.png", "sizes": "192x192" }] },
+		{ "name": "Routines", "url": "/planner/routines", "icons": [{ "src": "/icons/storybook-192.png", "sizes": "192x192" }] }
+	]
+}

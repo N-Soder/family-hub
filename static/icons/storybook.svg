@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Storybook app icon: tomato ground, marigold sun, cream house with a tomato tick.
+       Full-bleed so it works as a maskable icon: the art sits inside the central safe circle. -->
+  <rect width="512" height="512" fill="#E2553E"/>
+  <circle cx="338" cy="196" r="70" fill="#F4A72C"/>
+  <path d="M146 252 L256 162 L366 252 V368 a16 16 0 0 1 -16 16 H162 a16 16 0 0 1 -16 -16 Z" fill="#FFF8EE" stroke="#FFF8EE" stroke-width="26" stroke-linejoin="round"/>
+  <path d="M208 302 l34 34 l64 -68" fill="none" stroke="#E2553E" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

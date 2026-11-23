@@ -1,0 +1,55 @@
+# Family Hub + Tesserae on one network. Only 3000 (app) and 8765 (Tesserae) are
+# published to the LAN. Values come from .env (see .env.example).
+services:
+  family-hub:
+    build: .
+    image: family-hub:local
+    restart: unless-stopped
+    depends_on: [tesserae]
+    ports: ["${APP_PORT:-3000}:3000"]
+    volumes:
+      - family-hub-data:/data
+      # Tesserae's downloaded calendar feeds, read-only, for the Planner's Today tab (ADR-19).
+      - ${TESSERAE_DATA:-./data/tesserae}/plugins/calendar_core:/calendar:ro
+    environment:
+      DATABASE_PATH: /data/family-hub.db
+      CALENDAR_DIR: /calendar
+      ADMIN_PIN: ${ADMIN_PIN}
+      TZ_HOUSEHOLD: ${TZ_HOUSEHOLD:-Australia/Perth}
+      DAY_ROLLOVER: ${DAY_ROLLOVER:-03:00}
+      SEED_ON_EMPTY: "true"
+      TESSERAE_URL: http://tesserae:8765
+      TESSERAE_ADMIN_PASSWORD: ${TESSERAE_ADMIN_PASSWORD}
+      TESSERAE_PUSH_TOKEN: ${TESSERAE_PUSH_TOKEN}
+      APP_BASE_URL_FOR_TESSERAE: http://family-hub:3000
+      TESSERAE_AUTO_BOOTSTRAP: "true"
+      SIM_DEVICE_ID: ${SIM_DEVICE_ID:-sim-wall}
+      # Cloudflare Access login replaces the PIN on the public hostname (ADR-18); blank = off.
+      CF_ACCESS_TEAM_DOMAIN: ${CF_ACCESS_TEAM_DOMAIN:-}
+      CF_ACCESS_AUD: ${CF_ACCESS_AUD:-}
+
+  tesserae:
+    image: ghcr.io/dmellok/tesserae:0.475.0 # pinned; upgrade deliberately (docs/roadmap.md)
+    restart: unless-stopped
+    ports: ["${TESSERAE_PORT:-8765}:8765"]
+    volumes: ["${TESSERAE_DATA:-./data/tesserae}:/app/data"]
+    # Lets a Family Hub dev server on the host (npm run dev) receive webhooks.
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    environment:
+      TESSERAE_SECRET_KEY: ${TESSERAE_SECRET_KEY}
+      TESSERAE_HOST_IP: ${HOST_LAN_IP}
+      TZ: ${TZ_HOUSEHOLD:-Australia/Perth}
+
+  # Remote access (ADR-17, docs/remote-access.md). Off unless started with
+  # `docker compose --profile tunnel up -d`. Dials out to Cloudflare; no ports are opened.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.0 # pinned; multi-arch
+    profiles: [tunnel]
+    restart: unless-stopped
+    depends_on: [family-hub]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+
+volumes:
+  family-hub-data:

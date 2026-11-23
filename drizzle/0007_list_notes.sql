@@ -1,0 +1,1 @@
+ALTER TABLE `list_item` ADD `notes` text;
