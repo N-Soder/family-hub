@@ -60,3 +60,35 @@ test('kid view: tap to tick, hold to undo, hold to leave', async ({ page }) => {
 	await page.goto('/planner/lists');
 	await expect(page).toHaveURL(/\/planner\/lists$/);
 });
+
+test('kid view: the "All done!" star gets a random colour, never the same twice in a row', async ({ page }) => {
+	await page.goto('/planner/login');
+	await page.getByLabel('PIN').fill(PIN);
+	await page.getByRole('button', { name: 'Unlock' }).click();
+	await page.waitForURL('**/planner');
+	await page.goto('/planner/kids');
+
+	const cards = page.locator('.step');
+	await expect(cards.first()).toBeVisible();
+	const toggle = async (i: number) => {
+		await cards.nth(i).focus();
+		await page.keyboard.press('Enter');
+		await page.waitForTimeout(800); // past the per-card lock
+	};
+	const n = await cards.count();
+	for (let i = 0; i < n; i++) if ((await cards.nth(i).getAttribute('aria-pressed')) !== 'true') await toggle(i);
+
+	const star = page.locator('.party .big');
+	await expect(star).toBeVisible();
+	const first = await star.getAttribute('style');
+	expect(first).toMatch(/--star: var\(--(sun|tomato|tangerine|leaf|teal|sky|plum|rose)\)/);
+
+	// Undo the last step and finish again: a different colour.
+	await toggle(n - 1);
+	await expect(star).toBeHidden();
+	await toggle(n - 1);
+	await expect(star).toBeVisible();
+	const second = await star.getAttribute('style');
+	expect(second).toMatch(/--star: var\(--/);
+	expect(second).not.toBe(first);
+});

@@ -46,6 +46,13 @@
 
 	let sound = $state(true);
 	let celebrate = $state(false);
+	// The big star's colour: a random pick each time, never the same twice in a row.
+	const STAR_COLOURS = ['sun', 'tomato', 'tangerine', 'leaf', 'teal', 'sky', 'plum', 'rose'];
+	let starColour = $state('sun');
+	const pickStarColour = () => {
+		const others = STAR_COLOURS.filter((c) => c !== starColour);
+		starColour = others[Math.floor(Math.random() * others.length)];
+	};
 	let celebratedAt = 0;
 	// The same finger's click lands on the overlay as it opens; only later taps close it.
 	const closeParty = () => Date.now() - celebratedAt > 1200 && (celebrate = false);
@@ -62,6 +69,7 @@
 		const nowAllDone = done && steps.length > 0 && steps.every((s) => (s.id === stepId ? true : isDone(s)));
 		if (nowAllDone) {
 			cue('allDone', sound);
+			pickStarColour();
 			celebrate = true;
 			celebratedAt = Date.now();
 			clearTimeout(celebrateTimer);
@@ -331,7 +339,7 @@
 					<span class="fly tone-{st.t}" style:--a={`${st.a}deg`} style:--d={`${st.d}px`}><Glyph name="star" size={44} /></span>
 				{/each}
 			</span>
-			<span class="big"><Glyph name="star" size={150} /></span>
+			<span class="big" style:--star={`var(--${starColour})`}><Glyph name="star" size={150} /></span>
 			<span class="yay">All done!</span>
 			<span class="sub">Great job, {kid?.name}!</span>
 		</button>
@@ -671,8 +679,8 @@
 		animation: fade 0.3s ease;
 	}
 	.big {
-		color: var(--sun);
-		--glyph-bg: var(--sun);
+		color: var(--star, var(--sun));
+		--glyph-bg: var(--star, var(--sun));
 		--glyph-bg-opacity: 0.5;
 		animation: bounce 0.9s cubic-bezier(0.3, 1.8, 0.5, 1);
 	}
