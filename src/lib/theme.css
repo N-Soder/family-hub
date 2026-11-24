@@ -44,6 +44,10 @@
 	--sky: #2f6fbf;
 	--sky-soft: #e3eefb;
 	--sky-ink: #2b5a96;
+	/* Extra colours for the kid view's "All done!" star only (not tones). */
+	--leaf: #4a9a3c;
+	--rose: #d9468a;
+	--tangerine: #ee7a1a;
 	--serif: 'Fraunces', Georgia, 'Times New Roman', serif;
 	--sans: 'Outfit', system-ui, -apple-system, 'Segoe UI', sans-serif;
 	color-scheme: light;
@@ -76,6 +80,9 @@
 		--sky: #6ea6ea;
 		--sky-soft: #1f3049;
 		--sky-ink: #a9cbf5;
+		--leaf: #7cc96b;
+		--rose: #f08cbd;
+		--tangerine: #f7a356;
 		color-scheme: dark;
 	}
 }
@@ -106,6 +113,9 @@
 	--sky: #6ea6ea;
 	--sky-soft: #1f3049;
 	--sky-ink: #a9cbf5;
+	--leaf: #7cc96b;
+	--rose: #f08cbd;
+	--tangerine: #f7a356;
 	color-scheme: dark;
 }
 
