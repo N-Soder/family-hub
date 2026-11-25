@@ -11,6 +11,7 @@ import {
 	removeLog,
 	renameItem,
 	setItemDone,
+	setItemShop,
 	setNotes,
 	setSchedule,
 	skipRepeating,
@@ -54,6 +55,7 @@ export const actions: Actions = {
 		if (!getItem(db(), p.data.itemId)) return fail(400, { error: 'That item has gone.' });
 		renameItem(db(), p.data.itemId, p.data.title);
 		setNotes(db(), p.data.itemId, p.data.notes);
+		if (p.data.shop !== undefined && !setItemShop(db(), p.data.itemId, p.data.shop)) return fail(400, { error: 'That shop has gone. Pick another.' });
 		const l = itemDetail(db(), p.data.itemId)!.list;
 		if (l.kind !== 'grocery') setSchedule(db(), p.data.itemId, p.data.schedule);
 		changed();

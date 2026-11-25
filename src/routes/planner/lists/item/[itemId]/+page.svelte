@@ -132,6 +132,19 @@
 		</div>
 	{/if}
 
+	<!-- Where to buy it (ADR-41): only when its list has shops. -->
+	{#if data.shops.length}
+		<fieldset class="when">
+			<legend>Shop</legend>
+			<div class="choices">
+				<label class="choice"><input type="radio" name="shop" value="" checked={item.shopId === null} />Any shop</label>
+				{#each data.shops as shop (shop.id)}
+					<label class="choice tone-{shop.tone}"><input type="radio" name="shop" value={shop.id} checked={item.shopId === shop.id} /><span class="dot"></span>{shop.name}</label>
+				{/each}
+			</div>
+		</fieldset>
+	{/if}
+
 	{#if canPlan}
 
 	<label class="field"
@@ -386,5 +399,12 @@
 	}
 	details form {
 		margin-top: 12px;
+	}
+	/* A shop's colour (ADR-41). */
+	.dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--tone);
 	}
 </style>

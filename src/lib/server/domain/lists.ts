@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gt, isNotNull, isNull, lte, sql } from 'drizzle-orm';
 import type { DB } from '../db';
-import { list, listItem, listItemLog } from '../db/schema';
+import { list, listItem, listItemLog, listShop } from '../db/schema';
+import { sideOf } from '../../lists-side';
 import { addDays, localParts, DEFAULT_TZ } from './time';
 import {
 	addInterval,
@@ -128,7 +129,7 @@ export function listDetail(db: DB, id: number, now = new Date()) {
 	const l = db.select().from(list).where(eq(list.id, id)).get();
 	if (!l) return null;
 	const since = new Date(now.getTime() - TICK_GRACE_MS).toISOString();
-	return { list: l, ...arrange(db.select().from(listItem).where(eq(listItem.listId, id)).all(), localToday(now), since) };
+	return { list: l, shops: listShops(db, id), ...arrange(db.select().from(listItem).where(eq(listItem.listId, id)).all(), localToday(now), since) };
 }
 
 /** Is anything on any list dated or flagged Now? (Shows the Coming up view.) */
@@ -343,13 +344,71 @@ export function itemDetail(db: DB, itemId: number, now = new Date()) {
 	const item = db.select().from(listItem).where(eq(listItem.id, itemId)).get();
 	if (!item) return null;
 	const l = db.select().from(list).where(eq(list.id, item.listId)).get()!;
-	return { item: { ...item, meta: itemMeta(item, localToday(now)) }, list: l, log: itemLog(db, itemId), lead: leadFor(item), today: localToday(now) };
+	return { item: { ...item, meta: itemMeta(item, localToday(now)) }, list: l, shops: listShops(db, l.id), log: itemLog(db, itemId), lead: leadFor(item), today: localToday(now) };
 }
 
 /** A repeating item's latest log entry, if it is a "done" made in the last `withinMs`. */
 export function recentDone(db: DB, itemId: number, now: Date, withinMs: number) {
 	const log = db.select().from(listItemLog).where(eq(listItemLog.itemId, itemId)).orderBy(desc(listItemLog.id)).limit(1).get();
 	return log && log.kind === 'done' && now.getTime() - Date.parse(log.doneAt) < withinMs ? log : null;
+}
+
+// ---- Shops (ADR-41): where to buy things, on shopping and other lists only ----
+
+/** At most this many shops per list: the shop switch has to fit on one line. */
+export const MAX_SHOPS = 4;
+/** Tones handed to new shops in this order (teal, sky, plum, sun, tomato). */
+const SHOP_TONES = [1, 4, 3, 2, 0];
+
+export type Shop = typeof listShop.$inferSelect;
+
+export function listShops(db: DB, listId: number): Shop[] {
+	return db.select().from(listShop).where(eq(listShop.listId, listId)).orderBy(asc(listShop.sort), asc(listShop.id)).all();
+}
+
+export type AddShopResult = { status: 'added' | 'exists'; shopId: number } | { status: 'full' | 'not-allowed' };
+
+/**
+ * Add a shop to a list. A shop of the same name (ignoring case and spacing) is not duplicated.
+ * To-do lists have no shops, and a list holds at most MAX_SHOPS.
+ */
+export function addShop(db: DB, listId: number, name: string): AddShopResult {
+	const clean = name.trim().replace(/\s+/g, ' ');
+	return db.transaction((tx) => {
+		const l = tx.select().from(list).where(eq(list.id, listId)).get();
+		if (!l || sideOf(l.kind) !== 'lists') return { status: 'not-allowed' } as const;
+		const shops = tx.select().from(listShop).where(eq(listShop.listId, listId)).all();
+		const same = shops.find((s) => norm(s.name) === norm(clean));
+		if (same) return { status: 'exists', shopId: same.id } as const;
+		if (shops.length >= MAX_SHOPS) return { status: 'full' } as const;
+		const used = new Set(shops.map((s) => s.tone));
+		const tone = SHOP_TONES.find((t) => !used.has(t)) ?? SHOP_TONES[shops.length % SHOP_TONES.length];
+		const sort = shops.reduce((m, s) => Math.max(m, s.sort + 1), 0);
+		const id = tx.insert(listShop).values({ listId, name: clean, tone, sort }).run().lastInsertRowid;
+		return { status: 'added', shopId: Number(id) } as const;
+	});
+}
+
+/** Remove a shop; its items go back to any shop. Returns false when it had already gone. */
+export function removeShop(db: DB, shopId: number): boolean {
+	return db.transaction((tx) => {
+		tx.update(listItem).set({ shopId: null }).where(eq(listItem.shopId, shopId)).run();
+		return tx.delete(listShop).where(eq(listShop.id, shopId)).run().changes > 0;
+	});
+}
+
+/** Which list a shop belongs to (for checking a form's shop id against the page's list). */
+export function shopListId(db: DB, shopId: number): number | null {
+	return db.select({ listId: listShop.listId }).from(listShop).where(eq(listShop.id, shopId)).get()?.listId ?? null;
+}
+
+/** Tie an item to one of its list's shops, or to none (null). Returns false for a shop from another list. */
+export function setItemShop(db: DB, itemId: number, shopId: number | null): boolean {
+	const item = getItem(db, itemId);
+	if (!item) return false;
+	if (shopId !== null && shopListId(db, shopId) !== item.listId) return false;
+	db.update(listItem).set({ shopId }).where(eq(listItem.id, itemId)).run();
+	return true;
 }
 
 // ---- Starter jobs for a house list ----

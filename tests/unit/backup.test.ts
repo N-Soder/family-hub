@@ -78,13 +78,13 @@ describe('backups before migrations', () => {
 		expect(fs.existsSync(backups)).toBe(false); // a new, empty database has nothing to copy
 
 		const old = new Database(file);
-		expect(pendingMigrations(old, 'drizzle')).toEqual(['0007_list_notes', '0008_board_session', '0009_gifts', '0010_notes']);
+		expect(pendingMigrations(old, 'drizzle')).toEqual(['0007_list_notes', '0008_board_session', '0009_gifts', '0010_notes', '0011_list_shops']);
 		old.close();
 
 		openDb(file, { backupDir: backups }).$client.close();
 		expect(dbs(backups)).toEqual([expect.stringMatching(/^family-hub-pre-0007-\d{8}-\d{4}\.db$/)]);
 		const copy = new Database(path.join(backups, dbs(backups)[0]), { readonly: true });
-		expect(pendingMigrations(copy, 'drizzle')).toEqual(['0007_list_notes', '0008_board_session', '0009_gifts', '0010_notes']);
+		expect(pendingMigrations(copy, 'drizzle')).toEqual(['0007_list_notes', '0008_board_session', '0009_gifts', '0010_notes', '0011_list_shops']);
 		copy.close();
 
 		openDb(file, { backupDir: backups }).$client.close();

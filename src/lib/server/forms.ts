@@ -107,6 +107,9 @@ export const itemForm = z.object({ title: itemTitle });
 export const listIdForm = z.object({ listId: id });
 export const newListForm = z.object({ name: title, kind: z.enum(['grocery', 'todo', 'other']) });
 export const itemIdForm = z.object({ itemId: id });
+/** A shop on a list (ADR-41): short, so a few fit on one line. */
+export const shopForm = z.object({ listId: id, name: z.string().trim().min(1, 'Required').max(20, 'Keep it under 20 characters') });
+export const shopIdForm = z.object({ listId: id, shopId: id });
 export const itemToggleForm = z.object({ itemId: id, done: z.enum(['1', '0']).transform((v) => v === '1') });
 export const itemRenameForm = z.object({ itemId: id, title: itemTitle });
 export const loginForm = z.object({ pin: z.string().max(12) });
@@ -139,7 +142,9 @@ export const itemScheduleForm = z
 		every: z.coerce.number({ message: 'A number, 1 or more' }).int('Whole numbers').min(1, 'At least 1').max(99, 'At most 99').default(1),
 		unit: z.enum(['day', 'week', 'month', 'year']).default('month'),
 		/** '' = automatic. */
-		lead: z.preprocess(blankNull, z.coerce.number({ message: 'Days, 0 or more' }).int('Whole days').min(0, 'Days, 0 or more').max(365, 'At most 365').nullable())
+		lead: z.preprocess(blankNull, z.coerce.number({ message: 'Days, 0 or more' }).int('Whole days').min(0, 'Days, 0 or more').max(365, 'At most 365').nullable()),
+		/** Where to buy it (ADR-41): a shop id, '' for any shop; left out when the list has no shops. */
+		shop: z.union([z.literal(''), id]).optional()
 	})
 	.refine((f) => f.repeat !== 'none' || f.when !== 'date' || f.due, { path: ['due'], message: 'Pick a date' })
 	.transform((f) => {
@@ -148,6 +153,7 @@ export const itemScheduleForm = z
 			itemId: f.itemId,
 			title: f.title,
 			notes: f.notes,
+			shop: f.shop === undefined ? undefined : f.shop === '' ? null : f.shop,
 			schedule: {
 				due: oneOff && f.when !== 'date' ? null : f.due,
 				repeat: f.repeat === 'none' ? null : { every: f.every, unit: f.unit, mode: f.repeat },

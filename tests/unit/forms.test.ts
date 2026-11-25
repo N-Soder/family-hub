@@ -62,5 +62,13 @@ describe('item page form', () => {
 		const now = parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Tap', repeat: 'none', when: 'now', due: '2026-11-20', notes: '' })));
 		expect(now.success && now.data).toMatchObject({ notes: null, schedule: { due: null, now: true } });
 		expect(parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Tap', notes: 'x'.repeat(2001) }))).success).toBe(false);
+		// Shop (ADR-41): left out = unchanged, '' = any shop, an id = that shop.
+		const noShop = parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Milk' })));
+		expect(noShop.success && noShop.data.shop).toBeUndefined();
+		const anyShop = parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Milk', shop: '' })));
+		expect(anyShop.success && anyShop.data.shop).toBeNull();
+		const atShop = parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Milk', shop: '5' })));
+		expect(atShop.success && atShop.data.shop).toBe(5);
+		expect(parseForm(itemScheduleForm, fd(Object.entries({ itemId: '3', title: 'Milk', shop: 'x' }))).success).toBe(false);
 	});
 });

@@ -8,6 +8,7 @@
 	import { keep } from '$lib/enhance';
 	import Glyph from '$lib/components/Glyph.svelte';
 	import ListFields from '$lib/components/ListFields.svelte';
+	import { byShop, readShopPick, saveShopPick } from '$lib/shop-filter';
 	import type { ActionData, PageData } from '../../routes/planner/lists/$types';
 	// Shared by the Lists and Tasks sides (ADR-40); `data.side` says which.
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -30,12 +31,29 @@
 	let creating = $state(false); // the + on the index: new list
 	let addInput: HTMLInputElement | undefined = $state();
 
+	// Shops (ADR-41): lists on the Lists side only. Picking one hides items tied to another shop.
+	const shops = $derived(data.detail?.shops ?? []);
+	const shopById = $derived(new Map(shops.map((s) => [s.id, s])));
+	let shopPick = $state<number | null>(null);
+	let peek = $state(false); // show the hidden items, dimmed
+	// A shop removed elsewhere drops the filter.
+	const atShop = $derived(shopPick !== null && shopById.has(shopPick) ? shopPick : null);
+	const filtered = $derived(byShop(data.detail?.open ?? [], atShop));
+	const hiddenIds = $derived(new Set(filtered.hidden.map((i) => i.id)));
+	const hiddenFor = $derived([...new Set(filtered.hidden.map((i) => shopById.get(i.shopId!)?.name ?? ''))].join(' or '));
+	function pickShop(id: number | null) {
+		shopPick = id;
+		peek = false;
+		if (list) saveShopPick(globalThis.localStorage, list.id, id);
+	}
+
 	// Switching list closes whatever was open.
 	let shownId: number | null = null;
 	$effect(() => {
 		if (list?.id !== shownId) {
 			shownId = list?.id ?? null;
-			menu = editing = creating = false;
+			menu = editing = creating = peek = false;
+			shopPick = list ? readShopPick(globalThis.localStorage, list.id, shops.map((s) => s.id)) : null;
 		}
 	});
 
@@ -110,13 +128,18 @@
 	</span>
 {/snippet}
 
+{#snippet shopTag(item: { shopId?: number | null })}
+	{@const shop = item.shopId ? shopById.get(item.shopId) : undefined}
+	{#if shop && shop.id !== atShop}<span class="shop tone-{shop.tone}"><span class="dot"></span>{shop.name}</span>{/if}
+{/snippet}
+
 <!-- One open item. To-do lists: the circle ticks it (a repeating one is done and comes back
      later), the rest of the row opens it. Shopping: the whole row ticks it, ⋯ opens it.
      A one-off ticked a moment ago stays here struck through; a tap puts it back. -->
 {#snippet row(item: (typeof data.coming)[number] | NonNullable<typeof data.detail>['open'][number], listId: number, from: string | null = null)}
 	{@const ticked = Boolean(item.doneAt)}
 	{@const on = ticked !== flipping.has(item.id)}
-	<li class:done={on}>
+	<li class:done={on} class:away={hiddenIds.has(item.id)}>
 		{#if canPlan}
 			<form class="tick" method="POST" action={act('toggle')} use:enhance={tick(item.id)}>
 				<input type="hidden" name="listId" value={listId} />
@@ -126,7 +149,7 @@
 					<span class="box">{#if on}<Glyph name="check" size={16} />{/if}</span>
 				</button>
 			</form>
-			<a class="item open" href={`/planner/lists/item/${item.id}`}>{@render details(item, from)}</a>
+			<a class="item open" href={`/planner/lists/item/${item.id}`}>{@render details(item, from)}{@render shopTag(item)}</a>
 		{:else}
 			<form method="POST" action={act('toggle')} use:enhance={tick(item.id)}>
 				<input type="hidden" name="listId" value={listId} />
@@ -135,6 +158,7 @@
 				<button class="item" aria-pressed={ticked}>
 					<span class="box">{#if on}<Glyph name="check" size={16} />{/if}</span>
 					{@render details(item, from)}
+					{@render shopTag(item)}
 				</button>
 			</form>
 			<a class="more" href={`/planner/lists/item/${item.id}`} aria-label={`Details for ${item.title}`}><Glyph name="more" size={20} /></a>
@@ -181,6 +205,34 @@
 					</div>
 				</details>
 			{/if}
+			{#if data.side === 'lists'}
+				<details class="sub" open={Boolean(form?.shopErrors || form?.shopAdded)}>
+					<summary>Shops</summary>
+					<p class="muted small">Tie items to a shop on their page, then pick a shop above the list to hide what's bought elsewhere.</p>
+					{#if shops.length}
+						<ul class="shops">
+							{#each shops as shop (shop.id)}
+								<li class="tone-{shop.tone}">
+									<span class="dot"></span><span class="name">{shop.name}</span>
+									<form method="POST" action={act('removeShop')} use:enhance={keep()}>
+										<input type="hidden" name="listId" value={list.id} />
+										<input type="hidden" name="shopId" value={shop.id} />
+										<button class="link danger" aria-label={`Remove ${shop.name}`}>Remove</button>
+									</form>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+					{#if shops.length < 4}
+						<form class="row add-shop" method="POST" action={act('addShop')} use:enhance={keep(['name'])}>
+							<input type="hidden" name="listId" value={list.id} />
+							<input name="name" placeholder="Add a shop" aria-label="New shop" maxlength="20" autocomplete="off" autocapitalize="words" enterkeyhint="done" required />
+							<button>Add</button>
+						</form>
+					{/if}
+					{#if form?.shopErrors?.name}<p class="error">{form.shopErrors.name}</p>{/if}
+				</details>
+			{/if}
 			<details class="sub" open={Boolean(form?.listErrors && !form.listErrors.confirm)}>
 				<summary>Rename or change icon</summary>
 				<form method="POST" action={act('save')} use:enhance={keep()}>
@@ -202,10 +254,19 @@
 	{/if}
 
 	{@render notices()}
+	<!-- The shop switch (ADR-41): plain words like the Lists · Tasks · Notes · Gifts switch. -->
+	{#if shops.length && !editing}
+		<div class="shop-switch" role="group" aria-label="Shopping at">
+			<button aria-pressed={atShop === null} class:on={atShop === null} onclick={() => pickShop(null)}>All</button>
+			{#each shops as shop (shop.id)}
+				<button aria-pressed={atShop === shop.id} class:on={atShop === shop.id} class="tone-{shop.tone}" onclick={() => pickShop(shop.id)}><span class="dot"></span>{shop.name}</button>
+			{/each}
+		</div>
+	{/if}
 	{#if canPlan && !data.detail.all.length && !data.detail.done.length}<p class="muted small">Tap the circle to tick an item. Tap the item to add notes, a due date or a repeat, like “Service the car every 12 months”.</p>{/if}
 
 	<ul class="items card">
-		{#each editing ? data.detail.all : data.detail.open as item, i (item.id)}
+		{#each editing ? data.detail.all : peek ? data.detail.open : filtered.shown as item, i (item.id)}
 			{#if !editing}
 				{@render row(item, list.id)}
 			{:else}
@@ -228,7 +289,8 @@
 			</li>
 			{/if}
 		{:else}
-			{#if data.detail.done.length || data.detail.later.length}<li class="empty muted">All done.</li>{/if}
+			{#if filtered.hidden.length}<li class="empty muted">Nothing else for {shopById.get(atShop!)?.name}.</li>
+			{:else if data.detail.done.length || data.detail.later.length}<li class="empty muted">All done.</li>{/if}
 		{/each}
 		<!-- Adding is the last row of the list (ADR-39). Enter adds and keeps the keyboard up. -->
 		{#if !editing}
@@ -252,6 +314,12 @@
 		{/if}
 	</ul>
 	{#if form?.errors?.title}<p class="error">{form.errors.title}</p>{/if}
+	{#if filtered.hidden.length && !editing}
+		<p class="hidden-line muted">
+			{filtered.hidden.length} {filtered.hidden.length === 1 ? 'item' : 'items'} for {hiddenFor} {peek ? 'shown' : 'hidden'}
+			<button class="link" onclick={() => (peek = !peek)}>{peek ? 'Hide' : 'Show'}</button>
+		</p>
+	{/if}
 
 	{#if data.detail.later.length && !editing}
 		<details class="fold">
@@ -607,6 +675,101 @@
 	li.done.undoing .title {
 		text-decoration: none;
 		color: var(--ink);
+	}
+	/* Shops (ADR-41): a coloured dot is the only colour; names stay muted text. */
+	.dot {
+		flex: none;
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--tone);
+	}
+	.shop {
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--muted);
+		white-space: nowrap;
+	}
+	.shop-switch {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 22px;
+		border-bottom: 1px solid var(--line);
+		margin: -4px 0 14px;
+	}
+	.shop-switch button {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		min-height: 44px;
+		padding: 0;
+		margin-bottom: -1px;
+		background: none;
+		border: none;
+		border-bottom: 2px solid transparent;
+		border-radius: 0;
+		color: var(--muted);
+		font: inherit;
+		font-weight: 500;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.shop-switch button.on {
+		color: var(--ink);
+		border-bottom-color: var(--accent);
+	}
+	li.away {
+		opacity: 0.45;
+	}
+	.hidden-line {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		margin: 6px 4px 0;
+		font-size: 0.92rem;
+	}
+	.hidden-line .link {
+		color: var(--accent-ink);
+		font-weight: 600;
+		min-height: 44px;
+	}
+	.shops {
+		list-style: none;
+		margin: 6px 0 4px;
+		padding: 0;
+	}
+	.shops li {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-height: 44px;
+	}
+	.shops li + li {
+		border-top: 1px solid var(--line);
+	}
+	.shops .name {
+		flex: 1;
+	}
+	.add-shop {
+		flex-wrap: nowrap;
+	}
+	.add-shop input:not([type='hidden']) {
+		flex: 1;
+		min-width: 0;
+		font: inherit;
+		font-size: 17px;
+		padding: 9px 12px;
+		border-radius: 12px;
+		border: 1.5px solid var(--line-strong);
+		background: var(--card);
+		color: var(--ink);
+	}
+	.shops form {
+		margin: 0;
 	}
 	/* Later and Ticked: quiet text lines that open in place. */
 	.fold {

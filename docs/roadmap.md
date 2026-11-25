@@ -272,6 +272,13 @@ Waiting on the owner:
     "Mark done" on a repeating item returns to its list with Undo. Every Planner back link is the
     same chevron + label (`BackLink`). Not yet: tried on an iPhone as the installed app.
 
+29. ✅ **Shops on lists (ADR-41), built 2026-11-25.** Migration 0011 (`list_shop`,
+    `list_item.shop_id`). ⋯ → Shops adds up to 4 per list (Lists side only); an item's page
+    picks one shop or Any shop; the **All · Grocer · Warehouse** switch hides items tied to
+    another shop, with a "N items for … hidden · Show" line; the pick is kept per phone for 3 h.
+    Demo Shopping list has two shops. `tests/unit/list-shops.test.ts`,
+    `tests/e2e/list-shops.spec.ts`. Not yet: tried on an iPhone as the installed app.
+
 ## Stage 2
 
 - Board surface `/board` ✅ (Next item 5, ADR-30). Left for later: an adult unlock on the Board for habit detail, swipe between children, countdowns tile.

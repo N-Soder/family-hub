@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import type { DB } from './db';
-import { dayType, giftIdea, giftPerson, list, listItem, member, note, routineStep, routineTemplate, weeklyPattern } from './db/schema';
+import { dayType, giftIdea, giftPerson, list, listItem, listShop, member, note, routineStep, routineTemplate, weeklyPattern } from './db/schema';
 import { seed } from './seed';
 import { setWeatherPlace } from './weather';
 import { addDays, localParts } from './domain/time';
@@ -67,6 +67,13 @@ export async function seedDemo(db: DB, opts: { now?: Date; tz: string; pin?: str
 			'Milk', 'Bread', 'Bananas', 'Weet-Bix', { title: 'Nappies', notes: 'Size 4' }, 'Avocados', 'Yoghurt pouches', 'Sunscreen',
 			{ title: 'Eggs', doneAt: iso, doneBy: 'planner' }, { title: 'Coffee beans', doneAt: iso, doneBy: 'planner' }
 		]);
+		// Two shops (ADR-41): nappies and sunscreen from the warehouse, avocados from the grocer.
+		const shop = (name: string, tone: number, sort: number, titles: string[]) => {
+			const id = tx.insert(listShop).values({ listId: shopping, name, tone, sort }).returning().get().id;
+			for (const t of titles) tx.update(listItem).set({ shopId: id }).where(and(eq(listItem.listId, shopping), eq(listItem.title, t))).run();
+		};
+		shop('Grocer', 1, 0, ['Avocados', 'Bananas']);
+		shop('Warehouse', 4, 1, ['Nappies', 'Sunscreen']);
 		fill(newList('House', 'todo', 'home', 1), [
 			{ title: 'Clean the gutters', dueDate: day(-2) },
 			{ title: 'Pay council rates', dueDate: day(2), notes: 'Reference on the fridge' },

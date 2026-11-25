@@ -78,6 +78,13 @@
       "when": 1794708012162,
       "tag": "0010_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1795602590028,
+      "tag": "0011_list_shops",
+      "breakpoints": true
     }
   ]
 }
