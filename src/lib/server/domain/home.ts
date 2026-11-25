@@ -51,7 +51,7 @@ export interface HomeView {
 	calendar: { connected: boolean; error: string | null; today: CalEvent[]; tomorrow: CalEvent[] | null };
 	due: WallTodo[];
 	dueMore: number;
-	lists: Array<{ id: number; name: string; icon: string; open: number }>;
+	lists: Array<{ id: number; name: string; kind: string; icon: string; open: number }>;
 	listsMore: number;
 	notes: Array<{ id: number; title: string; preview: string; edited: string }>;
 	notesMore: number;
@@ -118,7 +118,7 @@ export function homeView(db: DB, opts: { dir?: string; tz?: string; now?: Date; 
 		calendar: { connected: cal.connected, error: cal.error, today, tomorrow },
 		due,
 		dueMore: todo.filter((i) => !i.done).length - due.filter((i) => !i.done).length,
-		lists: lists.slice(0, HOME_LISTS).map((l) => ({ id: l.id, name: l.name, icon: l.icon, open: l.open })),
+		lists: lists.slice(0, HOME_LISTS).map((l) => ({ id: l.id, name: l.name, kind: l.kind, icon: l.icon, open: l.open })),
 		listsMore: Math.max(0, lists.length - HOME_LISTS),
 		notes: notes.slice(0, HOME_NOTES).map((n) => ({ id: n.id, title: n.title, preview: n.preview, edited: editedLabel(n.updatedAt, now) })),
 		notesMore: Math.max(0, notes.length - HOME_NOTES),

@@ -21,7 +21,7 @@ test('notes: autosave, reload, conflict between two phones', async ({ browser, p
 
 	// Notes sit with lists: the Lists tab, then the Lists · Notes · Gifts switch (ADR-38, ADR-39).
 	await page.getByRole('navigation', { name: 'Planner', exact: true }).getByRole('link', { name: 'Lists' }).click();
-	await page.getByRole('navigation', { name: 'Lists, notes and gifts' }).getByRole('link', { name: 'Notes' }).click();
+	await page.getByRole('navigation', { name: 'Lists, tasks, notes and gifts' }).getByRole('link', { name: 'Notes' }).click();
 	await page.waitForURL('**/planner/notes');
 	await page.getByRole('button', { name: 'New note' }).click();
 	await page.waitForURL(/\/planner\/notes\/\d+\?new=1$/);

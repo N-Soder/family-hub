@@ -1,4 +1,5 @@
 import { error, fail, redirect } from '@sveltejs/kit';
+import { listUrl } from '$lib/lists-side';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import {
@@ -64,7 +65,7 @@ export const actions: Actions = {
 		if (!item) return fail(400, { error: 'That item has gone.' });
 		const done = (await request.formData()).get('done') !== '0';
 		if (setItemDone(db(), item.id, done, 'planner')) changed();
-		if (done) redirect(303, `/planner/lists?list=${item.listId}`);
+		if (done) redirect(303, listUrl(itemDetail(db(), item.id)!.list));
 		return { notice: 'Back on the list.' };
 	},
 	done: async ({ request }) => {
@@ -75,7 +76,7 @@ export const actions: Actions = {
 		if (!res) return fail(400, { error: 'Only repeating items keep a history.' });
 		changed();
 		// Back to the whole list, which says what was done and offers Undo.
-		redirect(303, `/planner/lists?list=${getItem(db(), p.data.itemId)!.listId}&done=${p.data.itemId}`);
+		redirect(303, `${listUrl(itemDetail(db(), p.data.itemId)!.list)}&done=${p.data.itemId}`);
 	},
 	skip: async ({ request }) => {
 		const p = parseForm(snoozeForm.pick({ itemId: true }), await request.formData());
@@ -98,11 +99,10 @@ export const actions: Actions = {
 		return { notice: 'Removed from the history.' };
 	},
 	remove: async ({ params }) => {
-		const item = getItem(db(), Number(params.itemId));
-		if (item) {
-			deleteItem(db(), item.id);
-			changed();
-		}
-		redirect(303, `/planner/lists?list=${item?.listId ?? ''}`);
+		const d = itemDetail(db(), Number(params.itemId));
+		if (!d) redirect(303, '/planner/lists');
+		deleteItem(db(), d.item.id);
+		changed();
+		redirect(303, listUrl(d.list));
 	}
 };

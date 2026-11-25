@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// Lists index and list pages (ADR-39), phone-sized: the Lists · Notes · Gifts switch on the index
+// Lists and Tasks index and list pages (ADR-39, ADR-40), phone-sized: the Lists · Tasks · Notes · Gifts switch on the index
 // pages, the index rows open a list on its own page with a back link, items are added from the
 // last row, Coming up shows only when something is due, and the Lists tab reopens the side last used.
 const PIN = process.env.E2E_PIN ?? '246810';
@@ -17,7 +17,7 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 
 	// The index: switch, title, no Coming up while nothing is due, one row per list.
 	const tabs = page.getByRole('navigation', { name: 'Planner', exact: true });
-	const sides = page.getByRole('navigation', { name: 'Lists, notes and gifts' });
+	const sides = page.getByRole('navigation', { name: 'Lists, tasks, notes and gifts' });
 	await tabs.getByRole('link', { name: 'Lists' }).click();
 	await page.waitForURL(/\/planner\/lists$/);
 	await expect(sides.getByRole('link', { name: 'Lists' })).toHaveAttribute('aria-current', 'page');
@@ -26,16 +26,23 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 	await expect(page.getByRole('heading', { name: 'All lists' })).toBeVisible();
 	await expect(page.locator('.index a', { hasText: 'Shopping' })).toBeVisible();
 
-	// Old Coming up links land on the index.
+	// Old Coming up links land on the Tasks index.
 	await page.goto('/planner/lists?view=coming');
-	await expect(page).toHaveURL(/\/planner\/lists$/);
+	await expect(page).toHaveURL(/\/planner\/tasks$/);
 
-	// + opens the new list form; a new list opens on its own page, without the switch.
+	// Tasks is the second side: to-do lists and Coming up (ADR-40).
+	await sides.getByRole('link', { name: 'Tasks' }).click();
+	await page.waitForURL(/\/planner\/tasks$/);
+	await expect(sides.getByRole('link', { name: 'Tasks' })).toHaveAttribute('aria-current', 'page');
+	await expect(page.getByRole('heading', { name: 'Tasks', level: 1 })).toBeVisible();
+	await expect(page.locator('.index a', { hasText: 'Shopping' })).toHaveCount(0);
+
+	// + opens the new list form (to-do by default here); a new list opens on its own page, without the switch.
 	await page.getByRole('button', { name: 'New list' }).click();
 	await page.getByPlaceholder('e.g. House jobs').fill(name);
-	await page.getByLabel('Kind').selectOption('todo');
+	await expect(page.getByLabel('Kind')).toHaveValue('todo');
 	await page.getByRole('button', { name: 'Create' }).click();
-	await page.waitForURL(/\/planner\/lists\?list=\d+$/);
+	await page.waitForURL(/\/planner\/tasks\?list=\d+$/);
 	const listUrl = page.url();
 	await expect(page.getByRole('heading', { name, level: 1 })).toBeVisible();
 	await expect(sides).toHaveCount(0);
@@ -59,8 +66,8 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 	await page.getByRole('button', { name: 'Done', exact: true }).click();
 	if (SHOTS) await page.screenshot({ path: `${SHOTS}/lists-list.png`, fullPage: true });
 
-	await page.locator('a.back', { hasText: 'Lists' }).click();
-	await page.waitForURL(/\/planner\/lists$/);
+	await page.locator('a.back', { hasText: 'Tasks' }).click();
+	await page.waitForURL(/\/planner\/tasks$/);
 	const coming = page.locator('ul[aria-labelledby="h-coming"]');
 	await expect(page.getByRole('heading', { name: 'Coming up' })).toBeVisible();
 	await expect(coming.getByText('Fix the gate')).toBeVisible();
@@ -90,7 +97,7 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 	await page.getByRole('button', { name: 'Save' }).click();
 	await expect(page.getByText('Saved.')).toBeVisible();
 	await page.getByRole('button', { name: 'Mark done', exact: true }).click();
-	await page.waitForURL(/\/planner\/lists\?list=\d+&done=\d+$/);
+	await page.waitForURL(/\/planner\/tasks\?list=\d+&done=\d+$/);
 	await expect(page.getByRole('status')).toContainText('Oil the hinges: done. Next due');
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect(page.getByRole('status')).toHaveText('Undone.');
@@ -114,12 +121,16 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 	await sides.getByRole('link', { name: 'Lists' }).click();
 	await page.waitForURL(/\/planner\/lists$/);
 
+	// An old link to a to-do list on the Lists side moves to Tasks.
+	await page.goto(listUrl.replace('/planner/tasks', '/planner/lists'));
+	await expect(page).toHaveURL(listUrl);
+
 	// Clean up: delete the list from its menu.
 	await page.goto(listUrl);
 	await page.getByRole('button', { name: 'List options' }).click();
 	await page.locator('summary', { hasText: 'Delete list' }).click();
 	await page.getByLabel(/and everything on it/).check();
 	await page.getByRole('button', { name: 'Delete list' }).click();
-	await page.waitForURL(/\/planner\/lists$/);
+	await page.waitForURL(/\/planner\/tasks$/);
 	await expect(page.locator('.index a', { hasText: name })).toHaveCount(0);
 });

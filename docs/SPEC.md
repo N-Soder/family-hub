@@ -207,7 +207,7 @@ gift_idea    id, person_id, title, notes?, price? (whole dollars), status: idea|
              occasion? ("Christmas 2026"), created_at, bought_at?, given_at?
 ```
 
-- Planner only: **Gifts** is the third side of the Lists tab (Lists · Notes · Gifts, ADR-39). Never on the wall, the Board, the kid view or Coming up.
+- Planner only: **Gifts** is the fourth side of the Lists tab (Lists · Tasks · Notes · Gifts, ADR-39, ADR-40). Never on the wall, the Board, the kid view or Coming up.
 - **Gifts page:** people A–Z with "3 ideas · 1 bought" and their birthday; a quick add (person + idea) for when an idea comes up; add a person. Above them, each occasion with bought gifts not yet given ("Christmas 2026 · 5 bought for 3 people") with **Mark all given**.
 - **Person page:** add an idea; *Ideas* (the circle marks it bought, the row opens it); *Bought* (circle puts it back to an idea, **Given** moves it to history); *Given* grouped by occasion, newest first; name, birthday and notes (sizes, likes) under ⋯; delete with confirmation.
 - **Idea page:** name, notes with link chips (as list items), price, occasion, status.

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { keep } from '$lib/enhance';
+	import { listUrl } from '$lib/lists-side';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -183,7 +184,7 @@
 		</section>
 	{:else if s === 'todo' && h.due.length}
 		<section class="card" aria-labelledby="h-todo">
-			<div class="head"><h2 id="h-todo">To do</h2><a href="/planner/lists">Lists</a></div>
+			<div class="head"><h2 id="h-todo">To do</h2><a href="/planner/tasks">Tasks</a></div>
 			<ul class="todo">
 				{#each h.due as i (i.id)}
 					<li>
@@ -198,7 +199,7 @@
 					</li>
 				{/each}
 			</ul>
-			{#if h.dueMore > 0}<a class="more" href="/planner/lists">{h.dueMore} more</a>{/if}
+			{#if h.dueMore > 0}<a class="more" href="/planner/tasks">{h.dueMore} more</a>{/if}
 		</section>
 	{:else if s === 'lists' && (h.lists.length || h.notes.length)}
 		<section class="card" aria-labelledby="h-lists">
@@ -206,7 +207,7 @@
 			<ul class="links">
 				{#each h.lists as l, li (l.id)}
 					<li>
-						<a href={`/planner/lists?list=${l.id}`} class="tone-{li % 5}">
+						<a href={listUrl(l)} class="tone-{li % 5}">
 							<span class="ico"><Glyph name={l.icon} size={20} /></span>
 							<span class="nm">{l.name}</span>
 							<span class="muted">{l.open ? `${l.open} item${l.open === 1 ? '' : 's'}` : 'Empty'}</span>
