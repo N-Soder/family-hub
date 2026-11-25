@@ -58,7 +58,7 @@ test('gifts: ideas, bought, given and history', async ({ page }) => {
 	if (SHOTS) await page.screenshot({ path: `${SHOTS}/gifts-idea.png`, fullPage: true });
 
 	// Clean up so the shared e2e database does not collect people.
-	await page.getByRole('link', { name: `← ${name}` }).click();
+	await page.getByRole('link', { name }).and(page.locator('a.back')).click();
 	await page.getByRole('button', { name: 'Person options' }).click();
 	await page.getByText(`Delete ${name}`, { exact: true }).click();
 	await page.getByRole('checkbox').check();

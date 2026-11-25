@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import '$lib/theme.css';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -110,8 +111,8 @@
 		{/if}
 	</header>
 	<main>
-		{#if inSetup}<a class="back" href="/planner/settings"><Glyph name="back" size={18} />Settings</a>{/if}
-		{#if under('/planner/calendar')}<a class="back" href="/planner"><Glyph name="back" size={18} />Home</a>{/if}
+		{#if inSetup}<BackLink href="/planner/settings" label="Settings" />{/if}
+		{#if under('/planner/calendar')}<BackLink href="/planner" label="Home" />{/if}
 		{#if onIndex}
 			<nav class="side" aria-label="Lists, notes and gifts">
 				{#each SIDES as [s, label] (s)}
@@ -195,16 +196,6 @@
 	.links a.on {
 		color: var(--ink);
 		border-bottom-color: var(--accent);
-	}
-	.back {
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-		margin-bottom: 4px;
-		color: var(--muted);
-		text-decoration: none;
-		font-weight: 600;
-		font-size: 0.9rem;
 	}
 	.tabs {
 		display: none;

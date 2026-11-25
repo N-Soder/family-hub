@@ -442,8 +442,8 @@ export function itemListId(db: DB, itemId: number): number | null {
 export const WALL_LISTS = 2;
 /** A ticked item stays on the wall (struck through, still tappable) this long, then drops off. */
 export const WALL_TICK_GRACE_MS = 2 * 60_000;
-/** The same grace on a phone: a ticked one-off stays in its row this long before it moves to Ticked. */
-export const TICK_GRACE_MS = WALL_TICK_GRACE_MS;
+/** On a phone a ticked one-off stays in its row this long before it moves to Ticked (owner: 15 min, time to get round the shop). */
+export const TICK_GRACE_MS = 15 * 60_000;
 
 export interface WallList {
 	id: number;

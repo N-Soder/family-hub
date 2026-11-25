@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount, tick, untrack } from 'svelte';
@@ -243,7 +244,7 @@
 	const alert = $derived(['offline', 'conflict', 'signedOut', 'gone', 'error'].includes(status));
 </script>
 
-<p><a href="/planner/notes">← Notes</a></p>
+<BackLink href="/planner/notes" label="Notes" />
 
 <p class="status" class:alert role="status" aria-live="polite">{statusText}</p>
 

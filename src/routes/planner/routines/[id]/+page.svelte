@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { keep } from '$lib/enhance';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -34,7 +35,7 @@
 	const timerLabel = (s: (typeof data.steps)[number]) => (s.timer ? ` · ⏱ ${s.usualMin ? `usually ${fmtMin(s.usualMin)}` : 'timer'}` : '');
 </script>
 
-<p><a href={`/planner/members/${data.member.id}`}>← {data.member.name}</a></p>
+<BackLink href={`/planner/members/${data.member.id}`} label={data.member.name} />
 <h1>{data.template.name}</h1>
 {#if form?.saved}<p role="status" class="muted">{form.saved}</p>{/if}
 
