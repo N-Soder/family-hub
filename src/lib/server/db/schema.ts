@@ -169,6 +169,21 @@ export const list = sqliteTable('list', {
 	createdAt: text('created_at').notNull()
 });
 
+/** A shop on a shopping or other list (ADR-41). Items can be tied to one; the list filters by it. */
+export const listShop = sqliteTable(
+	'list_shop',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		listId: integer('list_id')
+			.notNull()
+			.references(() => list.id, { onDelete: 'cascade' }),
+		name: text('name').notNull(),
+		tone: integer('tone').notNull(), // .tone-N, 0–4
+		sort: integer('sort').notNull().default(0)
+	},
+	(t) => [index('list_shop_list').on(t.listId, t.sort)]
+);
+
 export const listItem = sqliteTable(
 	'list_item',
 	{
@@ -192,7 +207,9 @@ export const listItem = sqliteTable(
 		// Flagged "Now": to pick up soon, with no date. When it was flagged (ISO); null = not flagged.
 		nowSince: text('now_since'),
 		// Free text: details, a link, a phone number. Shown under the title on the list (first line).
-		notes: text('notes')
+		notes: text('notes'),
+		// Where to buy it (ADR-41): one of its list's shops, or null for any shop.
+		shopId: integer('shop_id').references(() => listShop.id, { onDelete: 'set null' })
 	},
 	(t) => [index('list_item_list').on(t.listId, t.sort)]
 );

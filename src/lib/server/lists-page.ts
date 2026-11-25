@@ -5,6 +5,10 @@ import { listUrl, sideOf, type ListSide } from '$lib/lists-side';
 import { db } from '$lib/server/db';
 import {
 	addItem,
+	addShop,
+	MAX_SHOPS,
+	removeShop,
+	shopListId,
 	addSuggestion,
 	allLists,
 	anyDated,
@@ -29,7 +33,7 @@ import {
 	TICK_GRACE_MS,
 	updateList
 } from '$lib/server/domain/lists';
-import { fieldErrors, itemForm, itemIdForm, itemRenameForm, itemToggleForm, listForm, listIdForm, logIdForm, newListForm, nowForm, parseForm, suggestForm } from '$lib/server/forms';
+import { fieldErrors, itemForm, itemIdForm, itemRenameForm, itemToggleForm, listForm, listIdForm, logIdForm, newListForm, nowForm, parseForm, shopForm, shopIdForm, suggestForm } from '$lib/server/forms';
 import { shortDate } from '$lib/server/domain/repeat';
 import { publish } from '$lib/server/events';
 import { hub } from '$lib/server/hub';
@@ -189,6 +193,21 @@ export const listsActions: Actions = {
 		updateList(db(), l.data.listId, p.data);
 		changed();
 		return { notice: 'List saved.' };
+	},
+	/** Add a shop to the list (⋯ → Shops, ADR-41). */
+	addShop: async ({ request }) => {
+		const p = parseForm(shopForm, await request.formData());
+		if (!p.success) return fail(400, { shopErrors: fieldErrors(p.error) });
+		const res = addShop(db(), p.data.listId, p.data.name);
+		if (res.status === 'full') return fail(400, { shopErrors: { name: `A list can have up to ${MAX_SHOPS} shops.` } });
+		if (res.status === 'not-allowed') return fail(400, { error: 'To-do lists have no shops.' });
+		changed();
+		return { notice: res.status === 'exists' ? `${p.data.name} is already a shop.` : undefined, shopAdded: true };
+	},
+	removeShop: async ({ request }) => {
+		const p = parseForm(shopIdForm, await request.formData());
+		if (!p.success || shopListId(db(), p.data.shopId) !== p.data.listId || !removeShop(db(), p.data.shopId)) return fail(400, { error: 'That shop has gone.' });
+		changed();
 	},
 	deleteList: async ({ request }) => {
 		const form = await request.formData();

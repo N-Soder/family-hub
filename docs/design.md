@@ -62,6 +62,11 @@ Applies to Lists, Notes, Gifts and any new Planner screen with an index and item
 - **Actions** (+, ⋯, Back, "+ Person", "New note") are plain icons or accent text, no circle or
   border. Every tap target is at least 44 px.
 - **Nothing scrolls sideways.** No rows of pills; if there are many things, the index grows down.
+- **Shops (ADR-41):** a list with shops shows **All · Shop · Shop** under the title in the same
+  plain-word, single-underline style as the side switch; each shop has a tone dot, its only
+  colour. A row's shop is muted text with the dot at its right end, dropped while that shop is
+  picked. Items hidden by the pick are one quiet line under the card with Show / Hide. At most
+  4 shops per list, one shop per item. Never on to-do lists.
 - Secondary groups (Later, Ticked) are quiet muted text lines ("Ticked 7") that open in place.
 
 ## On e-paper (verified on Tesserae 0.475.0, architecture §8 S8; in `tesserae/paint/routine.js`)

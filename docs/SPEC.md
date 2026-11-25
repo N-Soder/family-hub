@@ -181,6 +181,8 @@ Rules:
 
 ```
 list_item         + due_date?, repeat_every?, repeat_unit: day|week|month|year?, repeat_mode: after|fixed?, repeat_anchor?, lead_days?, now_since?, notes?
+list_shop         id, list_id, name, tone (0–4), sort       -- ADR-41, migration 0011; Lists side only, ≤ 4 per list
+list_item         + shop_id? (→ list_shop, set null when the shop is removed)
 list_item_log     id, item_id, kind: done|skipped, done_on (local date, may be backdated), done_at, done_by: wall|board|planner, note?, due_before
 ```
 
