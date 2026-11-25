@@ -69,7 +69,7 @@ test('notes: autosave, reload, conflict between two phones', async ({ browser, p
 	await expect(row).toContainText('From phone two');
 	await page.getByRole('button', { name: 'New note' }).click();
 	await page.waitForURL(/\?new=1$/);
-	await page.getByRole('link', { name: '← Notes' }).click();
+	await page.getByRole('link', { name: 'Notes', exact: true }).and(page.locator('a.back')).click();
 	await page.waitForURL('**/planner/notes');
 	await expect(page.getByText('Untitled')).toHaveCount(0);
 	if (SHOTS) await page.screenshot({ path: `${SHOTS}/notes-list.png`, fullPage: true });

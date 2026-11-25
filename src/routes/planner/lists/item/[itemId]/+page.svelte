@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { keep } from '$lib/enhance';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -62,7 +63,7 @@
 	const tone = (s: string | undefined) => (s === 'overdue' ? 'tone-0' : s === 'today' || s === 'soon' ? 'tone-2' : 'tone-1');
 </script>
 
-<p><a href={`/planner/lists?list=${data.list.id}`}>← {data.list.name}</a></p>
+<BackLink href={`/planner/lists?list=${data.list.id}`} label={data.list.name} />
 <!-- The circle marks it done, as on the list; a repeating one is done today. -->
 <div class="head">
 	{#if item.repeatEvery}

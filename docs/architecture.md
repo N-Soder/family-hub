@@ -131,8 +131,8 @@ See `docs/SPEC.md` §5 for the table list. Key invariants:
 - Shared lists (`list`, `list_item`, migration 0002, which also creates a "Shopping" list) are
   household-wide. Writes are idempotent: ticking sets a state; adding an item already on the
   list (case and spacing ignored) does nothing if it is open and unticks it if it is ticked.
-  Clearing ticked items deletes them. On a phone a one-off ticked in the last 2 min
-  (`TICK_GRACE_MS`, the wall's grace) stays in its row struck through and a tap puts it back in
+  Clearing ticked items deletes them. On a phone a one-off ticked in the last 15 min
+  (`TICK_GRACE_MS`; owner, 2026-11-25: time to get round the shop. The wall keeps 2 min) stays in its row struck through and a tap puts it back in
   place (owner, 2026-11-25); then it moves to Ticked, and the page reloads itself when the grace
   ends. "Mark done" on a repeating item's page returns to the list (`?done=<item>`), which shows
   "done, next due …" with Undo while that done is within the grace. List writes publish a `change` event on `/api/events`, so

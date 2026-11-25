@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -46,7 +47,7 @@
 	});
 </script>
 
-<p><a href="/planner/gifts">← Gifts</a></p>
+<BackLink href="/planner/gifts" label="Gifts" />
 <div class="head">
 	<div>
 		<h1>{person.name}</h1>

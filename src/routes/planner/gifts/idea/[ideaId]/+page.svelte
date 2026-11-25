@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { keep } from '$lib/enhance';
 	import Glyph from '$lib/components/Glyph.svelte';
@@ -33,7 +34,7 @@
 	);
 </script>
 
-<p><a href={`/planner/gifts/${data.person.id}`}>← {data.person.name}</a></p>
+<BackLink href={`/planner/gifts/${data.person.id}`} label={data.person.name} />
 <h1>{idea.title}</h1>
 {#if form?.notice}<p class="muted" role="status">{form.notice}</p>{/if}
 {#if form?.error}<p class="error" role="alert">{form.error}</p>{/if}

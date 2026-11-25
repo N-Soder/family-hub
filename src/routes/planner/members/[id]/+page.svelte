@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { keep } from '$lib/enhance';
 	import MemberFields from '$lib/components/MemberFields.svelte';
@@ -8,7 +9,7 @@
 	let { data, form }: PageProps = $props();
 </script>
 
-<p><a href="/planner/members">← Members</a></p>
+<BackLink href="/planner/members" label="Members" />
 <h1>{data.member.name}</h1>
 {#if form?.saved}<p role="status" class="muted">{form.saved}</p>{/if}
 

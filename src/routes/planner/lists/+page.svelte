@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BackLink from '$lib/components/BackLink.svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -134,7 +135,7 @@
 {/snippet}
 
 {#if list && data.detail}
-	<a class="back" href="/planner/lists"><Glyph name="back" size={20} />Lists</a>
+	<BackLink href="/planner/lists" label="Lists" />
 	<div class="head">
 		<h1>{list.name}</h1>
 		{#if editing}
@@ -344,16 +345,6 @@
 <style>
 	/* ADR-39 / docs/design.md: plain icons and text, colour on icons only, cards are the only
 	   raised surface, nothing scrolls sideways. */
-	.back {
-		display: inline-flex;
-		align-items: center;
-		gap: 2px;
-		min-height: 44px;
-		margin: -6px 0 -4px -6px;
-		color: var(--accent-ink);
-		text-decoration: none;
-		font-weight: 600;
-	}
 	.head {
 		display: flex;
 		align-items: center;
