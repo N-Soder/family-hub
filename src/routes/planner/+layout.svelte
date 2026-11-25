@@ -35,11 +35,12 @@
 		};
 	});
 	// The same four tabs on desktop (header) and phone (tab bar), ADR-38. Setup pages open from
-	// Settings; the calendar opens from Home; Lists, Notes and Gifts share the Lists tab behind a
-	// three-way switch (ADR-39).
+	// Settings; the calendar opens from Home; Lists, Tasks, Notes and Gifts share the Lists tab
+	// behind a switch (ADR-39, ADR-40).
 	const LISTS_SIDE = 'fh-lists-side';
 	const SIDES = [
 		['lists', 'Lists'],
+		['tasks', 'Tasks'],
 		['notes', 'Notes'],
 		['gifts', 'Gifts']
 	] as const;
@@ -65,7 +66,7 @@
 				: href === listsHref
 					? side !== null
 					: under(href);
-	// The Lists tab goes back to whichever side (lists, notes or gifts) this phone used last.
+	// The Lists tab goes back to whichever side (lists, tasks, notes or gifts) this phone used last.
 	onMount(() => {
 		try {
 			const kept = localStorage.getItem(LISTS_SIDE);
@@ -114,7 +115,7 @@
 		{#if inSetup}<BackLink href="/planner/settings" label="Settings" />{/if}
 		{#if under('/planner/calendar')}<BackLink href="/planner" label="Home" />{/if}
 		{#if onIndex}
-			<nav class="side" aria-label="Lists, notes and gifts">
+			<nav class="side" aria-label="Lists, tasks, notes and gifts">
 				{#each SIDES as [s, label] (s)}
 					<a href={`/planner/${s}`} class:on={side === s} aria-current={side === s ? 'page' : undefined}>{label}</a>
 				{/each}

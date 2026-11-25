@@ -46,7 +46,7 @@ follows the phone (Auto) until Settings → This device pins one on that phone (
 
 ## Planner navigation and lists (ADR-39, owner 2026-11-23)
 Applies to Lists, Notes, Gifts and any new Planner screen with an index and items.
-- **Switch:** the Lists tab has three sides, **Lists · Notes · Gifts**: plain words, the active
+- **Switch:** the Lists tab has four sides, **Lists · Tasks · Notes · Gifts** (ADR-40): plain words, the active
   one in ink with a single accent underline, a hairline under the row. No pill, no fill. It shows
   on the three index pages only; the tab reopens the side last used on that phone.
 - **Index → page:** each side opens on an index; a row opens its own page with a "‹ Lists" back

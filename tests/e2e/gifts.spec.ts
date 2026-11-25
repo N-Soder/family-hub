@@ -15,7 +15,7 @@ test('gifts: ideas, bought, given and history', async ({ page }) => {
 	await page.waitForURL('**/planner');
 
 	await page.goto('/planner/lists');
-	await page.getByRole('navigation', { name: 'Lists, notes and gifts' }).getByRole('link', { name: 'Gifts' }).click();
+	await page.getByRole('navigation', { name: 'Lists, tasks, notes and gifts' }).getByRole('link', { name: 'Gifts' }).click();
 	await page.waitForURL('**/planner/gifts');
 	if (await page.getByRole('button', { name: 'Person' }).isVisible()) await page.getByRole('button', { name: 'Person' }).click();
 	await page.getByPlaceholder('e.g. Mum').fill(name);

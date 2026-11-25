@@ -266,6 +266,12 @@ Waiting on the owner:
     board, gifts and notes specs updated. Rules: `docs/design.md`. Not yet: tried on an iPhone
     as the installed app.
 
+28. ✅ **Tasks side, tick grace, one back link (ADR-40), built 2026-11-25.** No migration.
+    Lists · Tasks · Notes · Gifts: to-do lists and Coming up moved to `/planner/tasks`; the tab
+    still opens on Lists. A ticked one-off stays in its row for 15 min on a phone (wall: 2 min);
+    "Mark done" on a repeating item returns to its list with Undo. Every Planner back link is the
+    same chevron + label (`BackLink`). Not yet: tried on an iPhone as the installed app.
+
 ## Stage 2
 
 - Board surface `/board` ✅ (Next item 5, ADR-30). Left for later: an adult unlock on the Board for habit detail, swipe between children, countdowns tile.
