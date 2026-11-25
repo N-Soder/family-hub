@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { seededDb } from '../helpers';
 import { listItem } from '../../src/lib/server/db/schema';
-import { addItem, allLists, clearDone, createList, deleteList, listDetail, moveItem, setItemDone } from '../../src/lib/server/domain/lists';
+import { addItem, allLists, clearDone, createList, deleteList, listDetail, moveItem, setItemDone, TICK_GRACE_MS } from '../../src/lib/server/domain/lists';
 
 async function shopping() {
 	const db = await seededDb();
@@ -42,12 +42,38 @@ describe('shared lists', () => {
 		const milk = addItem(db, id, 'Milk').itemId;
 		expect(setItemDone(db, milk, true, 'planner')).toBe(true);
 		expect(setItemDone(db, milk, true, 'wall')).toBe(false);
-		const d = listDetail(db, id)!;
+		const d = listDetail(db, id, new Date(Date.now() + TICK_GRACE_MS))!;
 		expect(d.done).toMatchObject([{ title: 'Milk', doneBy: 'planner' }]);
 		expect(setItemDone(db, milk, false, 'planner')).toBe(true);
 		expect(setItemDone(db, milk, false, 'planner')).toBe(false);
 		expect(setItemDone(db, 9999, true, 'planner')).toBe(false);
 		expect(listDetail(db, id)!.open).toMatchObject([{ title: 'Milk', doneAt: null, doneBy: null }]);
+	});
+
+	it('a just-ticked item stays in its row for the grace, then moves to Ticked', async () => {
+		const { db, id } = await shopping();
+		const [, eggs] = ['Milk', 'Eggs', 'Bread'].map((t) => addItem(db, id, t).itemId);
+		const t0 = new Date('2026-11-25T02:00:00Z');
+		setItemDone(db, eggs, true, 'planner', t0);
+		const during = listDetail(db, id, new Date(t0.getTime() + TICK_GRACE_MS - 1000))!;
+		expect(titles(during.open)).toEqual(['Milk', 'Eggs', 'Bread']);
+		expect(during.open[1].doneAt).not.toBeNull();
+		expect(during.done).toEqual([]);
+		expect(allLists(db, t0)[0]).toMatchObject({ open: 2, done: 1 });
+		const after = listDetail(db, id, new Date(t0.getTime() + TICK_GRACE_MS))!;
+		expect(titles(after.open)).toEqual(['Milk', 'Bread']);
+		expect(titles(after.done)).toEqual(['Eggs']);
+	});
+
+	it('unticking in place keeps the row; unticking from Ticked goes to the bottom', async () => {
+		const { db, id } = await shopping();
+		const [milk, eggs] = ['Milk', 'Eggs', 'Bread'].map((t) => addItem(db, id, t).itemId);
+		setItemDone(db, milk, true, 'planner');
+		setItemDone(db, milk, false, 'planner', new Date(), { keepPlace: true });
+		expect(titles(listDetail(db, id)!.open)).toEqual(['Milk', 'Eggs', 'Bread']);
+		setItemDone(db, eggs, true, 'planner');
+		setItemDone(db, eggs, false, 'planner');
+		expect(titles(listDetail(db, id)!.open)).toEqual(['Milk', 'Bread', 'Eggs']);
 	});
 
 	it('ticked items list newest first; clearing removes only ticked items', async () => {

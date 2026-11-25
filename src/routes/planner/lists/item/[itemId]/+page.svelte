@@ -105,7 +105,7 @@
 		{#if doneErrors.doneOn}<p class="error">{doneErrors.doneOn}</p>{/if}
 		{#if doneErrors.note}<p class="error">{doneErrors.note}</p>{/if}
 		<div class="row">
-			<button>Done</button>
+			<button>Mark done</button>
 			<button class="ghost" formaction="?/snooze" name="days" value="7" formnovalidate>Snooze a week</button>
 			<button class="ghost" formaction="?/snooze" name="days" value="30" formnovalidate>Snooze a month</button>
 			{#if item.repeatMode === 'fixed'}<button class="ghost" formaction="?/skip" formnovalidate>Skip this one</button>{/if}

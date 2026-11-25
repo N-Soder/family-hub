@@ -71,11 +71,29 @@ test('lists: index, list page, add row, Coming up, three-way switch', async ({ p
 	await coming.getByRole('button', { name: 'Mark Fix the gate done' }).click();
 	await expect(page.getByRole('heading', { name: 'Coming up' })).toHaveCount(0);
 
-	// The row opens the list; Ticked is a quiet line that opens in place.
+	// The row opens the list. Just ticked, it stays in its row struck through; a tap puts it back
+	// in the same place, and ticking it again leaves it there for the grace.
 	await page.locator('.index a', { hasText: name }).click();
 	await expect(page).toHaveURL(listUrl);
-	await page.getByText('Ticked 1').click();
-	await expect(page.getByRole('button', { name: 'Fix the gate', exact: true })).toHaveAttribute('aria-pressed', 'true');
+	const items = page.locator('ul.items').first();
+	await expect(items.locator('li.done')).toContainText('Fix the gate');
+	await expect(page.getByText(/^Ticked/)).toHaveCount(0);
+	await page.getByRole('button', { name: 'Put Fix the gate back on the list' }).click();
+	await expect(page.getByRole('button', { name: 'Mark Fix the gate done' })).toHaveAttribute('aria-pressed', 'false');
+	await expect(items.locator('a.item')).toHaveText([/Fix the gate/, /Oil the hinges/]);
+	await page.getByRole('button', { name: 'Mark Fix the gate done' }).click();
+	await expect(page.getByRole('button', { name: 'Put Fix the gate back on the list' })).toHaveAttribute('aria-pressed', 'true');
+
+	// A repeating item: "Mark done" on its page goes back to the whole list, with Undo.
+	await page.getByRole('link', { name: 'Oil the hinges' }).click();
+	await page.getByLabel('Repeat').selectOption('after');
+	await page.getByRole('button', { name: 'Save' }).click();
+	await expect(page.getByText('Saved.')).toBeVisible();
+	await page.getByRole('button', { name: 'Mark done', exact: true }).click();
+	await page.waitForURL(/\/planner\/lists\?list=\d+&done=\d+$/);
+	await expect(page.getByRole('status')).toContainText('Oil the hinges: done. Next due');
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect(page.getByRole('status')).toHaveText('Undone.');
 
 	// The switch: Gifts is its own side, and the Lists tab reopens it until another side is used.
 	await page.goto('/planner/lists');
