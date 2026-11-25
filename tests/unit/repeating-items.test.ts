@@ -12,6 +12,7 @@ import {
 	listDetail,
 	removeLog,
 	setItemDone,
+	TICK_GRACE_MS,
 	setNotes,
 	setNow,
 	setSchedule,
@@ -136,7 +137,7 @@ describe('repeating list items', () => {
 		setSchedule(db, x, { due: '2026-11-06', repeat: null, leadDays: null }, NOW);
 		expect(listDetail(db, id, NOW)!.open[0].meta).toMatchObject({ label: 'Due in 4 days', repeat: null, progress: null });
 		expect(setItemDone(db, x, true, 'planner', NOW)).toBe(true);
-		expect(listDetail(db, id, NOW)!.done).toHaveLength(1);
+		expect(listDetail(db, id, new Date(NOW.getTime() + TICK_GRACE_MS))!.done).toHaveLength(1);
 	});
 
 	it('Coming up gathers due items from every list, soonest first', async () => {

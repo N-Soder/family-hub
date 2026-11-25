@@ -74,7 +74,8 @@ export const actions: Actions = {
 		const res = completeRepeating(db(), p.data.itemId, { source: 'planner', doneOn: p.data.doneOn, note: p.data.note });
 		if (!res) return fail(400, { error: 'Only repeating items keep a history.' });
 		changed();
-		return { notice: `Done. ${nextNotice(res.next)}` };
+		// Back to the whole list, which says what was done and offers Undo.
+		redirect(303, `/planner/lists?list=${getItem(db(), p.data.itemId)!.listId}&done=${p.data.itemId}`);
 	},
 	skip: async ({ request }) => {
 		const p = parseForm(snoozeForm.pick({ itemId: true }), await request.formData());

@@ -21,9 +21,11 @@ import {
 	itemListId,
 	listDetail,
 	moveItem,
+	recentDone,
 	renameItem,
 	setItemDone,
 	setNow,
+	TICK_GRACE_MS,
 	updateList
 } from '$lib/server/domain/lists';
 import { fieldErrors, itemForm, itemIdForm, itemRenameForm, itemToggleForm, listForm, listIdForm, logIdForm, newListForm, nowForm, parseForm, suggestForm } from '$lib/server/forms';
@@ -46,9 +48,25 @@ export const load: PageServerLoad = ({ url }) => {
 	}
 	const current = lists.find((l) => l.id === Number(asked));
 	if (!current) redirect(303, '/planner/lists');
-	const detail = listDetail(db(), current.id);
+	const now = new Date();
+	const detail = listDetail(db(), current.id, now);
 	const suggestions = current.kind !== 'grocery' ? suggestionsFor(db(), current.id) : [];
-	return { lists, coming: [], detail, suggestions };
+	// Just-ticked rows move to Ticked when their grace ends; the page reloads then.
+	const ends = detail!.open.filter((i) => i.doneAt).map((i) => Date.parse(i.doneAt!) + TICK_GRACE_MS - now.getTime());
+	const regraceIn = ends.length ? Math.max(0, Math.min(...ends)) : null;
+	return { lists, coming: [], detail, suggestions, regraceIn, doneNotice: doneNotice(url, current.id, now) };
+};
+
+/**
+ * Back from an item page's "Mark done" (`?done=<itemId>`): say so, with Undo while the done is
+ * recent. After an undo, or once it is old, nothing is shown.
+ */
+function doneNotice(url: URL, listId: number, now: Date) {
+	const itemId = Number(url.searchParams.get('done'));
+	const item = itemId ? getItem(db(), itemId) : null;
+	if (!item || item.listId !== listId || !item.dueDate) return null;
+	const log = recentDone(db(), item.id, now, TICK_GRACE_MS);
+	return log ? { notice: `${item.title}: done. Next due ${shortDate(item.dueDate, localToday(now))}.`, undo: log.id } : null;
 };
 
 /**
@@ -93,7 +111,9 @@ export const actions: Actions = {
 			changed();
 			return { notice: `${item.title}: done. Next due ${shortDate(res.next, localToday())}.`, undo: res.logId };
 		}
-		if (setItemDone(db(), d.itemId, d.done, 'planner')) changed(d.itemId);
+		// Unticking a row still in its grace keeps its place; from Ticked it goes to the bottom.
+		const keepPlace = !d.done && Boolean(item?.doneAt) && Date.now() - Date.parse(item!.doneAt!) < TICK_GRACE_MS;
+		if (setItemDone(db(), d.itemId, d.done, 'planner', new Date(), { keepPlace })) changed(d.itemId);
 	},
 	/** Undo a repeating item's "done" (the notice's Undo button). */
 	undo: async ({ request }) => {

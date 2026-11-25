@@ -52,6 +52,14 @@
 			addInput?.focus();
 		};
 
+	// Ticked rows stay in place for a short grace (to undo a mis-tap), then move to Ticked.
+	$effect(() => {
+		const ms = data.regraceIn;
+		if (ms === null || ms === undefined) return;
+		const t = setTimeout(() => invalidateAll(), ms + 500);
+		return () => clearTimeout(t);
+	});
+
 	// Live: another phone adding or ticking refreshes this list.
 	onMount(() => {
 		const es = new EventSource('/api/events');
@@ -61,12 +69,13 @@
 </script>
 
 {#snippet notices()}
-	{#if form?.notice}
+	{@const shown = form?.notice ? form : (data.doneNotice ?? null)}
+	{#if shown?.notice}
 		<div class="muted note" role="status">
-			{form.notice}
-			{#if form?.undo}
+			{shown.notice}
+			{#if shown.undo}
 				<form method="POST" action={act('undo')} use:enhance={keep()} class="inline">
-					<input type="hidden" name="logId" value={form.undo} />
+					<input type="hidden" name="logId" value={shown.undo} />
 					<button class="link undo">Undo</button>
 				</form>
 			{/if}
@@ -93,16 +102,19 @@
 {/snippet}
 
 <!-- One open item. To-do lists: the circle ticks it (a repeating one is done and comes back
-     later), the rest of the row opens it. Shopping: the whole row ticks it, ⋯ opens it. -->
+     later), the rest of the row opens it. Shopping: the whole row ticks it, ⋯ opens it.
+     A one-off ticked a moment ago stays here struck through; a tap puts it back. -->
 {#snippet row(item: (typeof data.coming)[number] | NonNullable<typeof data.detail>['open'][number], listId: number, from: string | null = null)}
-	<li class:done={flipping.has(item.id)}>
+	{@const ticked = Boolean(item.doneAt)}
+	{@const on = ticked !== flipping.has(item.id)}
+	<li class:done={on}>
 		{#if canPlan}
 			<form class="tick" method="POST" action={act('toggle')} use:enhance={tick(item.id)}>
 				<input type="hidden" name="listId" value={listId} />
 				<input type="hidden" name="itemId" value={item.id} />
-				<input type="hidden" name="done" value="1" />
-				<button class="check" aria-pressed="false" aria-label={`Mark ${item.title} done`}>
-					<span class="box">{#if flipping.has(item.id)}<Glyph name="check" size={16} />{/if}</span>
+				<input type="hidden" name="done" value={ticked ? '0' : '1'} />
+				<button class="check" aria-pressed={ticked} aria-label={ticked ? `Put ${item.title} back on the list` : `Mark ${item.title} done`}>
+					<span class="box">{#if on}<Glyph name="check" size={16} />{/if}</span>
 				</button>
 			</form>
 			<a class="item open" href={`/planner/lists/item/${item.id}`}>{@render details(item, from)}</a>
@@ -110,9 +122,9 @@
 			<form method="POST" action={act('toggle')} use:enhance={tick(item.id)}>
 				<input type="hidden" name="listId" value={listId} />
 				<input type="hidden" name="itemId" value={item.id} />
-				<input type="hidden" name="done" value="1" />
-				<button class="item" aria-pressed="false">
-					<span class="box">{#if flipping.has(item.id)}<Glyph name="check" size={16} />{/if}</span>
+				<input type="hidden" name="done" value={ticked ? '0' : '1'} />
+				<button class="item" aria-pressed={ticked}>
+					<span class="box">{#if on}<Glyph name="check" size={16} />{/if}</span>
 					{@render details(item, from)}
 				</button>
 			</form>

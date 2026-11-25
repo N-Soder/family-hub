@@ -88,15 +88,18 @@ function showOrder(today: string, dueOf: (i: ItemRow) => string | null = (i) => 
 
 /**
  * A list's items as the Planner shows them: `open` (what is on the list now), `later`
- * (repeating items not due yet, by due date) and `done` (ticked one-offs).
+ * (repeating items not due yet, by due date) and `done` (ticked one-offs). With `ticksSince`,
+ * a one-off ticked after it stays in `open` (struck through, in its row) so a mis-tap can be
+ * undone in place, as on the wall.
  */
-export function arrange(items: ItemRow[], today: string) {
+export function arrange(items: ItemRow[], today: string, ticksSince?: string) {
 	const view = (i: ItemRow): ViewItem => ({ ...i, meta: itemMeta(i, today) });
-	const done = items.filter((i) => i.doneAt).sort((a, b) => (b.doneAt! > a.doneAt! ? 1 : b.doneAt! < a.doneAt! ? -1 : b.id - a.id));
+	const inGrace = (i: ItemRow) => ticksSince !== undefined && i.doneAt !== null && i.doneAt > ticksSince;
+	const done = items.filter((i) => i.doneAt && !inGrace(i)).sort((a, b) => (b.doneAt! > a.doneAt! ? 1 : b.doneAt! < a.doneAt! ? -1 : b.id - a.id));
 	const notDone = items.filter((i) => !i.doneAt);
 	const isLater = (i: ItemRow) => repeatOf(i) !== null && dueState(i.dueDate!, today, leadFor(i)) === 'later';
 	return {
-		open: notDone.filter((i) => !isLater(i)).sort(showOrder(today)).map(view),
+		open: [...notDone.filter((i) => !isLater(i)), ...items.filter(inGrace)].sort(showOrder(today)).map(view),
 		later: notDone.filter(isLater).sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : a.dueDate! > b.dueDate! ? 1 : a.id - b.id)).map(view),
 		done: done.map(view),
 		/** Every item not ticked, in list order (edit mode). */
@@ -124,7 +127,8 @@ export function allLists(db: DB, now = new Date()) {
 export function listDetail(db: DB, id: number, now = new Date()) {
 	const l = db.select().from(list).where(eq(list.id, id)).get();
 	if (!l) return null;
-	return { list: l, ...arrange(db.select().from(listItem).where(eq(listItem.listId, id)).all(), localToday(now)) };
+	const since = new Date(now.getTime() - TICK_GRACE_MS).toISOString();
+	return { list: l, ...arrange(db.select().from(listItem).where(eq(listItem.listId, id)).all(), localToday(now), since) };
 }
 
 /** Is anything on any list dated or flagged Now? (Shows the Coming up view.) */
@@ -438,6 +442,8 @@ export function itemListId(db: DB, itemId: number): number | null {
 export const WALL_LISTS = 2;
 /** A ticked item stays on the wall (struck through, still tappable) this long, then drops off. */
 export const WALL_TICK_GRACE_MS = 2 * 60_000;
+/** The same grace on a phone: a ticked one-off stays in its row this long before it moves to Ticked. */
+export const TICK_GRACE_MS = WALL_TICK_GRACE_MS;
 
 export interface WallList {
 	id: number;
