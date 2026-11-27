@@ -83,12 +83,23 @@ test('kid view: the "All done!" star gets a random colour, never the same twice 
 	const first = await star.getAttribute('style');
 	expect(first).toMatch(/--star: var\(--(sun|tomato|tangerine|leaf|teal|sky|plum|rose)\)/);
 
-	// Undo the last step and finish again: a different colour.
+	// Tap it away (past the guard against a stray tap), undo the last step, finish again.
+	const close = async () => {
+		await page.waitForTimeout(1300);
+		await page.locator('.party').click();
+		await expect(star).toBeHidden();
+	};
+	await close();
 	await toggle(n - 1);
-	await expect(star).toBeHidden();
 	await toggle(n - 1);
 	await expect(star).toBeVisible();
 	const second = await star.getAttribute('style');
 	expect(second).toMatch(/--star: var\(--/);
 	expect(second).not.toBe(first);
+
+	// Tapped away, the small star under the cards keeps the same colour.
+	await close();
+	const small = page.locator('.finished .small-star');
+	await expect(small).toBeVisible();
+	expect(await small.getAttribute('style')).toBe(second);
 });
