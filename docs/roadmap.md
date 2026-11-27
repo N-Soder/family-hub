@@ -200,6 +200,8 @@ Waiting on the owner:
     over 1.5 s, and let go when the page is hidden (`tests/unit/kid-feedback.test.ts`). Not yet seen on the iPad.
     2026-11-24: the big "All done!" star takes a random colour from eight (the five tones plus leaf,
     rose and tangerine, light and dark), never the same twice in a row (`tests/e2e/kid-view.spec.ts`).
+    2026-11-27: the celebration stays up 30 s (was 6 s; a tap still closes it after 1.2 s), and the
+    small star by "All done!" under the cards takes the same colour as the big one.
     Not yet: confirmed on the real iPad; feel of the hold; wake lock in the installed app.
 
 20. ✅ **Wall: side buttons instead of touch, Home and Lists only (ADR-28), built 2026-11-03.**

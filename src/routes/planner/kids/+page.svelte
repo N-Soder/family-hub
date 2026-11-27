@@ -73,7 +73,7 @@
 			celebrate = true;
 			celebratedAt = Date.now();
 			clearTimeout(celebrateTimer);
-			celebrateTimer = setTimeout(() => (celebrate = false), 6000);
+			celebrateTimer = setTimeout(() => (celebrate = false), 30000);
 		} else cue(done ? 'tick' : 'untick', sound);
 		if (done) {
 			popped = stepId;
@@ -344,7 +344,7 @@
 			<span class="sub">Great job, {kid?.name}!</span>
 		</button>
 	{/if}
-	{#if allDone && !celebrate}<p class="finished"><Glyph name="star" size={28} /> All done!</p>{/if}
+	{#if allDone && !celebrate}<p class="finished"><span class="small-star" style:--star={`var(--${starColour})`}><Glyph name="star" size={28} /></span> All done!</p>{/if}
 </div>
 
 <style>
@@ -627,12 +627,18 @@
 		text-align: center;
 		font-family: var(--serif);
 		font-size: 2rem;
-		color: var(--sun-ink);
+		color: var(--ink);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 10px;
-		--glyph-bg: var(--sun);
+	}
+	/* Same colour as the big star that just went. */
+	.small-star {
+		display: inline-flex;
+		color: var(--star, var(--sun));
+		--glyph-bg: var(--star, var(--sun));
+		--glyph-bg-opacity: 0.5;
 	}
 	.exit {
 		position: fixed;
